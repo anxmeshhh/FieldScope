@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
+
+/* FieldScope Design System — Dark Navy + Cyan Professional */
+
+@layer base {
+  :root {
+    --background: 218 54% 4%;
+    --foreground: 210 35% 94%;
+
+    --card: 218 46% 7%;
+    --card-foreground: 210 35% 94%;
+
+    --popover: 218 46% 7%;
+    --popover-foreground: 210 35% 94%;
+
+    --primary: 194 100% 43%;
+    --primary-foreground: 218 54% 4%;
+
+    --secondary: 218 36% 11%;
+    --secondary-foreground: 210 35% 88%;
+
+    --muted: 218 36% 11%;
+    --muted-foreground: 215 18% 50%;
+
+    --accent: 194 100% 43%;
+    --accent-foreground: 218 54% 4%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 218 28% 13%;
+    --input: 218 28% 13%;
+    --ring: 194 100% 43%;
+
+    --radius: 0.75rem;
+
+    /* Brand tokens */
+    --navy-950: 218 58% 3%;
+    --navy-900: 218 54% 4%;
+    --navy-800: 218 46% 7%;
+    --navy-700: 218 38% 10%;
+    --navy-600: 218 30% 15%;
+    --navy-500: 218 24% 22%;
+
+    --cyan: 194 100% 43%;
+    --cyan-light: 194 100% 58%;
+    --green: 158 84% 40%;
+    --orange: 22 100% 60%;
+    --purple: 263 68% 58%;
+    --yellow: 43 96% 58%;
+    --red: 4 86% 58%;
+    --blue: 211 80% 56%;
+    --teal: 180 72% 44%;
+    --pink: 330 72% 58%;
+
+    --sidebar-background: 218 52% 5%;
+    --sidebar-foreground: 210 35% 88%;
+    --sidebar-primary: 194 100% 43%;
+    --sidebar-primary-foreground: 218 54% 4%;
+    --sidebar-accent: 218 36% 10%;
+    --sidebar-accent-foreground: 210 35% 88%;
+    --sidebar-border: 218 28% 11%;
+    --sidebar-ring: 194 100% 43%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; scroll-behavior: smooth; }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'DM Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5 { font-family: 'Syne', sans-serif; }
+}
+
+@layer utilities {
+  .font-syne { font-family: 'Syne', sans-serif; }
+  .font-dm { font-family: 'DM Sans', sans-serif; }
+
+  .gradient-text-cyan {
+    background: linear-gradient(135deg, hsl(var(--cyan)), hsl(var(--cyan-light)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glass-panel {
+    background: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid hsl(var(--border));
+  }
+
+  .card-hover {
+    transition: all 0.25s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    border-color: hsl(var(--cyan) / 0.35);
+    box-shadow: 0 8px 32px hsl(var(--navy-950) / 0.8);
+  }
+
+  .badge-must { background: hsl(var(--red) / 0.15); color: hsl(0 75% 75%); }
+  .badge-should { background: hsl(var(--orange) / 0.15); color: hsl(28 80% 72%); }
+  .badge-could { background: hsl(var(--green) / 0.12); color: hsl(155 65% 68%); }
+  .badge-in-progress { background: hsl(var(--cyan) / 0.12); color: hsl(var(--cyan)); }
+  .badge-pending { background: hsl(var(--muted)); color: hsl(var(--muted-foreground)); }
+  .badge-ready { background: hsl(var(--green) / 0.12); color: hsl(var(--green)); }
+  .badge-backlog { background: hsl(var(--purple) / 0.15); color: hsl(263 75% 80%); }
+
+  .method-get { background: hsl(var(--green) / 0.14); color: hsl(var(--green)); }
+  .method-post { background: hsl(var(--cyan) / 0.14); color: hsl(var(--cyan)); }
+  .method-put { background: hsl(var(--yellow) / 0.14); color: hsl(var(--yellow)); }
+  .method-delete { background: hsl(var(--red) / 0.14); color: hsl(var(--red)); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-up { animation: fadeUp 0.5s ease-out both; }
+.animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
+.animate-spin-slow { animation: spin-slow 12s linear infinite; }
+
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: hsl(var(--navy-900)); }
+::-webkit-scrollbar-thumb { background: hsl(var(--navy-600)); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--cyan) / 0.45); }
