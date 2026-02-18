@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TrendingUp, Target, Brain, ArrowRight, Zap, AlertTriangle, CheckCircle, Clock } from "lucide-react";
-import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, BarChart, Bar } from "recharts";
+import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 
 const revenueData = [
   { month: "Jan", revenue: 2.1 }, { month: "Feb", revenue: 2.8 },
@@ -21,8 +22,47 @@ const recentActivity = [
   { action: "New market trend: AI services +34%", time: "2d ago", type: "info" },
 ];
 
+interface DashboardData {
+  name: string;
+  assessment: {
+    domain: string;
+    ai_level: string;
+    confidence: number;
+    team_size: string;
+    capital: string;
+    revenue: string;
+    clients: string;
+  } | null;
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+  fetch("http://localhost:8000/dashboard/data/", {
+    credentials: "include",
+  })
+    .then((r) => {
+      if (r.status === 401) { navigate("/login"); return null; }
+      return r.json();
+    })
+    .then((d) => { if (d) setData(d); })
+    .finally(() => setLoading(false));
+}, []);
+
+  const level = data?.assessment?.ai_level ?? "—";
+  const domain = data?.assessment?.domain ?? "—";
+  const name = data?.name ?? "there";
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>Loading…</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8 animate-fade-up">
@@ -30,7 +70,7 @@ export default function Dashboard() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="font-syne font-black text-2xl md:text-3xl" style={{ color: "hsl(var(--foreground))" }}>
-            Good morning, Arjun 👋
+            Good morning, {name} 👋
           </h1>
           <p className="mt-1 text-sm" style={{ color: "hsl(var(--muted-foreground))" }}>
             Here's your business intelligence snapshot for today
@@ -48,23 +88,18 @@ export default function Dashboard() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Capability Score", val: "72/100", sub: "+8 from last month", color: "var(--cyan)", icon: Target },
-          { label: "Business Level", val: "Intermediate", sub: "Digital Marketing", color: "var(--purple)", icon: TrendingUp },
-          { label: "Revenue (Est.)", val: "₹18.5L", sub: "Annual potential", color: "var(--green)", icon: TrendingUp },
+          { label: "Capability Score", val: data?.assessment ? "72/100" : "—", sub: "+8 from last month", color: "var(--cyan)", icon: Target },
+          { label: "Business Level", val: level, sub: domain, color: "var(--purple)", icon: TrendingUp },
+          { label: "Revenue (Est.)", val: data?.assessment?.revenue ? `₹${data.assessment.revenue}` : "—", sub: "Monthly revenue", color: "var(--green)", icon: TrendingUp },
           { label: "Open Risks", val: "3 Alerts", sub: "Review recommended", color: "var(--orange)", icon: AlertTriangle },
         ].map((kpi) => (
-          <div
-            key={kpi.label}
-            className="rounded-2xl border p-5 card-hover"
-            style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
-          >
+          <div key={kpi.label} className="rounded-2xl border p-5 card-hover"
+            style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs" style={{ color: "hsl(var(--muted-foreground))" }}>{kpi.label}</span>
               <kpi.icon size={14} style={{ color: `hsl(${kpi.color})` }} />
             </div>
-            <div className="font-syne font-black text-xl" style={{ color: `hsl(${kpi.color})` }}>
-              {kpi.val}
-            </div>
+            <div className="font-syne font-black text-xl" style={{ color: `hsl(${kpi.color})` }}>{kpi.val}</div>
             <div className="text-xs mt-1" style={{ color: "hsl(var(--muted-foreground))" }}>{kpi.sub}</div>
           </div>
         ))}
@@ -72,23 +107,15 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Revenue chart */}
-        <div
-          className="lg:col-span-2 rounded-2xl border p-6"
-          style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
-        >
+        <div className="lg:col-span-2 rounded-2xl border p-6"
+          style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="font-syne font-bold text-base" style={{ color: "hsl(var(--foreground))" }}>
-                Revenue Trajectory
-              </h3>
-              <p className="text-xs mt-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>
-                Estimated monthly in ₹ Lakhs
-              </p>
+              <h3 className="font-syne font-bold text-base" style={{ color: "hsl(var(--foreground))" }}>Revenue Trajectory</h3>
+              <p className="text-xs mt-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>Estimated monthly in ₹ Lakhs</p>
             </div>
             <span className="text-xs px-2.5 py-1 rounded-full font-medium"
-              style={{ background: "hsl(var(--green) / 0.12)", color: "hsl(var(--green))" }}>
-              ↑ 22% MoM
-            </span>
+              style={{ background: "hsl(var(--green) / 0.12)", color: "hsl(var(--green))" }}>↑ 22% MoM</span>
           </div>
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={revenueData}>
@@ -110,14 +137,10 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
 
-        {/* Capability radar */}
-        <div
-          className="rounded-2xl border p-6"
-          style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
-        >
-          <h3 className="font-syne font-bold text-base mb-1" style={{ color: "hsl(var(--foreground))" }}>
-            Capability Scores
-          </h3>
+        {/* Capability scores */}
+        <div className="rounded-2xl border p-6"
+          style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
+          <h3 className="font-syne font-bold text-base mb-1" style={{ color: "hsl(var(--foreground))" }}>Capability Scores</h3>
           <p className="text-xs mb-5" style={{ color: "hsl(var(--muted-foreground))" }}>By dimension</p>
           <div className="space-y-3">
             {capabilityData.map((d) => (
@@ -127,22 +150,17 @@ export default function Dashboard() {
                   <span style={{ color: "hsl(var(--foreground))" }}>{d.score}%</span>
                 </div>
                 <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "hsl(var(--navy-600))" }}>
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${d.score}%`,
-                      background: d.score >= 70 ? "hsl(var(--green))" : d.score >= 50 ? "hsl(var(--cyan))" : "hsl(var(--orange))",
-                    }}
-                  />
+                  <div className="h-full rounded-full" style={{
+                    width: `${d.score}%`,
+                    background: d.score >= 70 ? "hsl(var(--green))" : d.score >= 50 ? "hsl(var(--cyan))" : "hsl(var(--orange))",
+                  }} />
                 </div>
               </div>
             ))}
           </div>
-          <button
-            onClick={() => navigate("/assessment")}
+          <button onClick={() => navigate("/assessment")}
             className="w-full mt-5 py-2 rounded-lg text-xs font-medium border transition-all"
-            style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
-          >
+            style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}>
             Retake Assessment →
           </button>
         </div>
@@ -150,13 +168,9 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Quick actions */}
-        <div
-          className="rounded-2xl border p-6"
-          style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
-        >
-          <h3 className="font-syne font-bold text-base mb-5" style={{ color: "hsl(var(--foreground))" }}>
-            Quick Actions
-          </h3>
+        <div className="rounded-2xl border p-6"
+          style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
+          <h3 className="font-syne font-bold text-base mb-5" style={{ color: "hsl(var(--foreground))" }}>Quick Actions</h3>
           <div className="grid grid-cols-2 gap-3">
             {[
               { label: "View Roadmap", path: "/roadmap", color: "var(--cyan)" },
@@ -164,16 +178,13 @@ export default function Dashboard() {
               { label: "Market Trends", path: "/market", color: "var(--blue)" },
               { label: "Risk Check", path: "/risk", color: "var(--orange)" },
             ].map((a) => (
-              <button
-                key={a.label}
-                onClick={() => navigate(a.path)}
+              <button key={a.label} onClick={() => navigate(a.path)}
                 className="flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium transition-all card-hover"
                 style={{
                   background: `hsl(${a.color} / 0.08)`,
                   borderColor: `hsl(${a.color} / 0.25)`,
                   color: `hsl(${a.color})`,
-                }}
-              >
+                }}>
                 <ArrowRight size={14} /> {a.label}
               </button>
             ))}
@@ -181,13 +192,9 @@ export default function Dashboard() {
         </div>
 
         {/* Activity feed */}
-        <div
-          className="rounded-2xl border p-6"
-          style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
-        >
-          <h3 className="font-syne font-bold text-base mb-5" style={{ color: "hsl(var(--foreground))" }}>
-            Recent Activity
-          </h3>
+        <div className="rounded-2xl border p-6"
+          style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}>
+          <h3 className="font-syne font-bold text-base mb-5" style={{ color: "hsl(var(--foreground))" }}>Recent Activity</h3>
           <div className="space-y-3">
             {recentActivity.map((a, i) => (
               <div key={i} className="flex items-start gap-3">

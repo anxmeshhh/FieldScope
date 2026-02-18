@@ -44,27 +44,28 @@ export default function LandingPage() {
         </div>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
-            style={{
-              background: "hsl(var(--cyan))",
-              color: "hsl(var(--navy-900))",
-            }}
+            onClick={() => navigate("/login")}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-all border"
+            style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))" }}
           >
-            Enter App <ArrowRight size={14} />
+            Sign In
+          </button>
+          <button
+            onClick={() => navigate("/signup")}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            style={{ background: "hsl(var(--cyan))", color: "hsl(var(--navy-900))" }}
+          >
+            Get Started <ArrowRight size={14} />
           </button>
         </div>
       </nav>
 
       {/* Hero */}
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-20">
-        {/* Orbs */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full pointer-events-none"
           style={{ background: "radial-gradient(circle, hsl(var(--cyan) / 0.06) 0%, transparent 70%)" }} />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full pointer-events-none"
           style={{ background: "radial-gradient(circle, hsl(var(--purple) / 0.06) 0%, transparent 70%)" }} />
-
-        {/* Grid */}
         <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
           style={{
             backgroundImage: "linear-gradient(hsl(var(--cyan)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--cyan)) 1px, transparent 1px)",
@@ -101,7 +102,7 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/signup")}
               className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-base transition-all hover:scale-105"
               style={{
                 background: "hsl(var(--cyan))",
@@ -113,7 +114,7 @@ export default function LandingPage() {
             </button>
             <button
               onClick={() => navigate("/explore")}
-              className="flex items-center gap-2 px-8 py-4 rounded-xl font-medium text-base border transition-all hover:border-cyan-brand"
+              className="flex items-center gap-2 px-8 py-4 rounded-xl font-medium text-base border transition-all"
               style={{
                 background: "hsl(var(--card))",
                 borderColor: "hsl(var(--border))",
@@ -125,7 +126,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Stats */}
         <div className="relative mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl w-full mx-auto animate-fade-up stagger-3">
           {stats.map((s) => (
             <div key={s.label} className="text-center">
@@ -152,7 +152,7 @@ export default function LandingPage() {
               key={f.title}
               className="rounded-2xl border p-6 card-hover group cursor-pointer"
               style={{ background: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/signup")}
             >
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
@@ -160,12 +160,8 @@ export default function LandingPage() {
               >
                 <f.icon size={20} style={{ color: `hsl(${f.color})` }} />
               </div>
-              <div
-                className="text-[10px] font-bold tracking-wider uppercase mb-1.5"
-                style={{ color: `hsl(${f.color})` }}
-              >
-                Phase {f.phase}
-              </div>
+              <div className="text-[10px] font-bold tracking-wider uppercase mb-1.5"
+                style={{ color: `hsl(${f.color})` }}>Phase {f.phase}</div>
               <h3 className="font-syne font-bold text-base mb-2" style={{ color: "hsl(var(--foreground))" }}>
                 {f.title}
               </h3>
@@ -191,12 +187,9 @@ export default function LandingPage() {
             Join thousands of Indian entrepreneurs who know exactly where they stand and where they're headed.
           </p>
           <button
-            onClick={() => navigate("/assessment")}
+            onClick={() => navigate("/signup")}
             className="px-8 py-4 rounded-xl font-semibold text-base transition-all hover:scale-105"
-            style={{
-              background: "hsl(var(--cyan))",
-              color: "hsl(var(--navy-900))",
-            }}
+            style={{ background: "hsl(var(--cyan))", color: "hsl(var(--navy-900))" }}
           >
             Take Free Assessment →
           </button>

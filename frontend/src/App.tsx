@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AppLayout from "./layouts/AppLayout";
 import LandingPage from "./pages/LandingPage";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import IndustryExplorer from "./pages/IndustryExplorer";
 import IndustryDetail from "./pages/IndustryDetail";
@@ -22,6 +24,12 @@ import FinancialPlanning from "./pages/FinancialPlanning";
 import TeamAssessment from "./pages/TeamAssessment";
 import NotFound from "./pages/NotFound";
 
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -32,6 +40,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login onLogin={() => {}} />} />
+          <Route path="/signup" element={<Signup onLogin={() => {}} />} />
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/explore" element={<IndustryExplorer />} />

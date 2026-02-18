@@ -3,57 +3,59 @@ import { useNavigate } from "react-router-dom";
 import { ChevronRight, ChevronLeft, Loader2, CheckCircle } from "lucide-react";
 
 const steps = [
-  {
-    id: "domain",
-    title: "Choose Your Industry",
-    desc: "Select the primary domain you operate or plan to enter",
-  },
-  {
-    id: "basics",
-    title: "Business Basics",
-    desc: "Tell us about your current business situation",
-  },
-  {
-    id: "team",
-    title: "Team & Experience",
-    desc: "Your team size and experience level",
-  },
-  {
-    id: "location",
-    title: "Location & Market",
-    desc: "Where do you operate?",
-  },
+  { id: "domain", title: "Choose Your Industry", desc: "Select the primary domain you operate or plan to enter" },
+  { id: "basics", title: "Business Basics", desc: "Tell us about your current business situation" },
+  { id: "team", title: "Team & Experience", desc: "Your team size and experience level" },
+  { id: "location", title: "Location & Market", desc: "Where do you operate?" },
 ];
+const API = "http://localhost:8000";
+const domains = ["Digital Marketing", "Construction & Real Estate", "D2C E-Commerce", "HealthTech", "FinTech", "AgriTech"];
+const skillOptions = ["SEO", "Paid Ads", "Content", "Design", "Video", "Analytics", "Automation", "Sales"];
 
 export default function Assessment() {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [result, setResult] = useState<{ level: string; confidence: number; domain: string } | null>(null);
   const [form, setForm] = useState({
     domain: "",
     capital: "",
     revenue: "",
     clients: "",
     teamSize: "",
-    experience: "",
     skills: [] as string[],
-    location: "",
     tier: "",
   });
   const navigate = useNavigate();
 
   const update = (key: string, val: string) => setForm((f) => ({ ...f, [key]: val }));
 
-  const handleNext = () => {
-    if (step < steps.length - 1) setStep((s) => s + 1);
-    else {
+  const handleNext = async () => {
+    if (step < steps.length - 1) {
+      setStep((s) => s + 1);
+    } else {
       setLoading(true);
-      setTimeout(() => { setLoading(false); setDone(true); }, 2500);
+      try {
+        const res = await fetch(`${API}/assessment/submit/`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  credentials: "include",
+  body: JSON.stringify(form),
+});
+        const data = await res.json();
+        if (res.ok) {
+          setResult(data);
+          setDone(true);
+        } else {
+          console.error(data.error);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
   };
-
-  const domains = ["Digital Marketing", "Construction & Real Estate", "D2C E-Commerce", "HealthTech", "FinTech", "AgriTech"];
-  const skills = ["SEO", "Paid Ads", "Content", "Design", "Video", "Analytics", "Automation", "Sales"];
 
   if (done) {
     return (
@@ -75,9 +77,11 @@ export default function Assessment() {
           <div className="text-xs font-bold tracking-widest uppercase mb-1" style={{ color: "hsl(var(--cyan))" }}>
             Your Level
           </div>
-          <div className="font-syne font-black text-3xl gradient-text-cyan">Intermediate</div>
+          <div className="font-syne font-black text-3xl gradient-text-cyan">
+            {result?.level ?? "Intermediate"}
+          </div>
           <div className="text-sm mt-1" style={{ color: "hsl(var(--muted-foreground))" }}>
-            Digital Marketing · Confidence: 87%
+            {result?.domain} · Confidence: {result?.confidence ?? 87}%
           </div>
         </div>
         <div className="flex gap-3">
@@ -118,10 +122,7 @@ export default function Assessment() {
         <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "hsl(var(--navy-600))" }}>
           <div
             className="h-full rounded-full transition-all duration-500"
-            style={{
-              width: `${((step + 1) / steps.length) * 100}%`,
-              background: "hsl(var(--cyan))",
-            }}
+            style={{ width: `${((step + 1) / steps.length) * 100}%`, background: "hsl(var(--cyan))" }}
           />
         </div>
       </div>
@@ -138,16 +139,13 @@ export default function Assessment() {
         {step === 0 && (
           <div className="grid grid-cols-2 gap-3">
             {domains.map((d) => (
-              <button
-                key={d}
-                onClick={() => update("domain", d)}
+              <button key={d} onClick={() => update("domain", d)}
                 className="py-3 px-4 rounded-xl border text-sm font-medium text-left transition-all"
                 style={{
                   background: form.domain === d ? "hsl(var(--cyan) / 0.1)" : "hsl(var(--navy-700))",
                   borderColor: form.domain === d ? "hsl(var(--cyan) / 0.5)" : "hsl(var(--border))",
                   color: form.domain === d ? "hsl(var(--cyan))" : "hsl(var(--muted-foreground))",
-                }}
-              >
+                }}>
                 {d}
               </button>
             ))}
@@ -167,11 +165,7 @@ export default function Assessment() {
                 </label>
                 <input
                   className="w-full px-4 py-3 rounded-xl border text-sm outline-none transition-all"
-                  style={{
-                    background: "hsl(var(--navy-700))",
-                    borderColor: "hsl(var(--border))",
-                    color: "hsl(var(--foreground))",
-                  }}
+                  style={{ background: "hsl(var(--navy-700))", borderColor: "hsl(var(--border))", color: "hsl(var(--foreground))" }}
                   placeholder={f.placeholder}
                   value={form[f.key as keyof typeof form] as string}
                   onChange={(e) => update(f.key, e.target.value)}
@@ -189,16 +183,13 @@ export default function Assessment() {
               </label>
               <div className="grid grid-cols-4 gap-2">
                 {["Solo", "2–5", "6–15", "15+"].map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => update("teamSize", s)}
+                  <button key={s} onClick={() => update("teamSize", s)}
                     className="py-3 rounded-xl border text-sm font-medium transition-all"
                     style={{
                       background: form.teamSize === s ? "hsl(var(--cyan) / 0.1)" : "hsl(var(--navy-700))",
                       borderColor: form.teamSize === s ? "hsl(var(--cyan) / 0.5)" : "hsl(var(--border))",
                       color: form.teamSize === s ? "hsl(var(--cyan))" : "hsl(var(--muted-foreground))",
-                    }}
-                  >
+                    }}>
                     {s}
                   </button>
                 ))}
@@ -209,23 +200,18 @@ export default function Assessment() {
                 Key skills (select all that apply)
               </label>
               <div className="flex flex-wrap gap-2">
-                {skills.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => {
-                      const curr = form.skills;
-                      setForm((f) => ({
-                        ...f,
-                        skills: curr.includes(s) ? curr.filter((x) => x !== s) : [...curr, s],
-                      }));
-                    }}
+                {skillOptions.map((s) => (
+                  <button key={s}
+                    onClick={() => setForm((f) => ({
+                      ...f,
+                      skills: f.skills.includes(s) ? f.skills.filter((x) => x !== s) : [...f.skills, s],
+                    }))}
                     className="px-3 py-1.5 rounded-lg border text-xs font-medium transition-all"
                     style={{
                       background: form.skills.includes(s) ? "hsl(var(--cyan) / 0.12)" : "hsl(var(--navy-700))",
                       borderColor: form.skills.includes(s) ? "hsl(var(--cyan) / 0.5)" : "hsl(var(--border))",
                       color: form.skills.includes(s) ? "hsl(var(--cyan))" : "hsl(var(--muted-foreground))",
-                    }}
-                  >
+                    }}>
                     {s}
                   </button>
                 ))}
@@ -246,16 +232,14 @@ export default function Assessment() {
                   { val: "tier2", label: "Tier-2 City", sub: "Pune, Surat, Jaipur" },
                   { val: "rural", label: "Rural / Town", sub: "Sub-district level" },
                 ].map((o) => (
-                  <button
-                    key={o.val}
-                    onClick={() => update("tier", o.val)}
+                  <button key={o.val} onClick={() => update("tier", o.val)}
                     className="py-3 px-3 rounded-xl border text-left transition-all"
                     style={{
                       background: form.tier === o.val ? "hsl(var(--cyan) / 0.1)" : "hsl(var(--navy-700))",
                       borderColor: form.tier === o.val ? "hsl(var(--cyan) / 0.5)" : "hsl(var(--border))",
-                    }}
-                  >
-                    <div className="text-sm font-medium" style={{ color: form.tier === o.val ? "hsl(var(--cyan))" : "hsl(var(--foreground))" }}>
+                    }}>
+                    <div className="text-sm font-medium"
+                      style={{ color: form.tier === o.val ? "hsl(var(--cyan))" : "hsl(var(--foreground))" }}>
                       {o.label}
                     </div>
                     <div className="text-xs mt-0.5" style={{ color: "hsl(var(--muted-foreground))" }}>{o.sub}</div>
