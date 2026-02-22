@@ -10,4 +10,8 @@ urlpatterns = [
     path("assessment/submit/", views.submit_assessment, name="submit-assessment"),
     path("dashboard/data/", views.dashboard_data, name="dashboard-data"),
     path("landing/stats/", views.landing_stats, name="landing-stats"),
+    
+    path("roadmap/generate/", views.generate_roadmap),
+    path("recommendations/", views.get_recommendations),  # match the actual function name
+    path("assessments/history/", views.assessment_history),
 ]
