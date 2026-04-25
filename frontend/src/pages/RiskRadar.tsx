@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { AlertTriangle, Shield, DollarSign, Scale, TrendingDown, CheckCircle, SlidersHorizontal, RefreshCw } from "lucide-react";
+import { AlertTriangle, Shield, DollarSign, Scale, TrendingDown, CheckCircle, SlidersHorizontal, RefreshCw, Database, Plus } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import HistorySelector from "../components/HistorySelector";
 
@@ -61,6 +61,9 @@ const css = `
   .rr-btn:hover { background: #1D4ED8; }
   .rr-btn:disabled { background: #94A3B8; cursor: not-allowed; }
 
+  .rr-btn-sec { background: #F1F5F9; color: #0F172A; }
+  .rr-btn-sec:hover { background: #E2E8F0; }
+
   .rr-risk-row { padding: 20px 24px; border-bottom: 1px solid #F1F5F9; display: flex; align-items: flex-start; gap: 16px; }
   .rr-risk-row:last-child { border-bottom: none; }
   .rr-risk-title { font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 4px; }
@@ -93,6 +96,7 @@ export default function RiskRadar() {
   const [aggregating, setAggregating] = useState(false);
   
   const [error, setError] = useState("");
+  const [hasSavedProfile, setHasSavedProfile] = useState(false);
 
   const loadInitial = async () => {
     setLoading(true);
@@ -109,8 +113,10 @@ export default function RiskRadar() {
       if (res.ok) {
         if (json.is_aggregated) {
           setData(json);
+          setHasSavedProfile(true);
         } else {
           setData(null);
+          setHasSavedProfile(false);
         }
       } else {
         setError(json.error || "Failed to load risk radar.");
@@ -167,6 +173,7 @@ export default function RiskRadar() {
       const json = await res.json();
       if (res.ok && json.success) {
         setData(json.aggregated);
+        setHasSavedProfile(true);
       } else {
         setError(json.error || "Failed to aggregate.");
       }
@@ -215,6 +222,20 @@ export default function RiskRadar() {
             </p>
           </div>
           <HistorySelector />
+        </div>
+
+        <div style={{ marginBottom: 24, display: "flex", gap: 12 }}>
+          {isAggregated ? (
+            <button className="rr-btn rr-btn-sec" style={{ width: "auto" }} onClick={() => { setData(null); setSimulations([]); }}>
+              <Plus size={16} /> Start New Simulation
+            </button>
+          ) : (
+            hasSavedProfile && (
+              <button className="rr-btn rr-btn-sec" style={{ width: "auto" }} onClick={loadInitial}>
+                <Database size={16} /> Restore Saved Profile
+              </button>
+            )
+          )}
         </div>
 
         <div className={isAggregated ? "" : "rr-grid"}>

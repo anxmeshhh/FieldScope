@@ -636,7 +636,7 @@ def assessment_history(request):
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
             SELECT id, domain, business_level, capability_score,
-                   ai_recommendations, created_at
+                   ai_recommendations, ai_risk_profile, ai_competitor_profile, created_at
             FROM assessments WHERE user_id = %s ORDER BY created_at DESC
         """, (user_id,))
         rows = cursor.fetchall()
@@ -650,6 +650,11 @@ def assessment_history(request):
                 r["ai_recommendations"] = json.loads(r["ai_recommendations"])
             except Exception:
                 r["ai_recommendations"] = None
+        
+        r["has_risk_profile"] = bool(r.get("ai_risk_profile"))
+        r["has_competitor_profile"] = bool(r.get("ai_competitor_profile"))
+        r.pop("ai_risk_profile", None)
+        r.pop("ai_competitor_profile", None)
         if r["created_at"]:
             r["created_at"] = r["created_at"].isoformat()
 
@@ -1636,21 +1641,31 @@ User's Simulated Profile:
 - Clients: {active_clients}
 - Skills: {a['skills']}
 
-Respond ONLY with a valid JSON object strictly matching this schema, without any markdown formatting or extra text:
+Respond ONLY with a valid JSON object strictly matching this schema, without any markdown formatting or extra text.
+Use integers for numbers. Do not use unescaped double quotes inside strings.
+
 {{
   "dimensions": [
-    {{"axis": "Team", "you": <number 0-100>, "competitor": <number 0-100>}},
-    {{"axis": "Capital", "you": <number 0-100>, "competitor": <number 0-100>}},
-    {{"axis": "Tools", "you": <number 0-100>, "competitor": <number 0-100>}},
-    {{"axis": "Network", "you": <number 0-100>, "competitor": <number 0-100>}},
-    {{"axis": "Portfolio", "you": <number 0-100>, "competitor": <number 0-100>}},
-    {{"axis": "Pricing", "you": <number 0-100>, "competitor": <number 0-100>}}
+    {{"axis": "Team", "you": 40, "competitor": 80}},
+    {{"axis": "Capital", "you": 30, "competitor": 90}},
+    {{"axis": "Tools", "you": 50, "competitor": 85}},
+    {{"axis": "Network", "you": 60, "competitor": 90}},
+    {{"axis": "Portfolio", "you": 45, "competitor": 85}},
+    {{"axis": "Pricing", "you": 70, "competitor": 95}}
   ],
   "gaps": [
-    {{"area": "<Area Name>", "you": "<Your status string>", "enterprise": "<Target competitor status string>", "gap": "Critical|High|Medium|Low", "action": "<1 short action sentence>"}}
+    {{
+      "area": "Example Area",
+      "you": "Your brief status",
+      "enterprise": "Competitor brief status",
+      "gap": "Critical",
+      "action": "One short action sentence without quotes"
+    }}
   ]
 }}
-Generate exactly 5 items in the gaps array.
+
+Generate exactly 6 items in the dimensions array using the exact axis names above.
+Generate exactly 5 items in the gaps array. The "gap" value must be exactly one of: "Critical", "High", "Medium", "Low".
 """
     try:
         chat = get_groq_client().chat.completions.create(

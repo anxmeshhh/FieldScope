@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { useSearchParams } from "react-router-dom";
 import HistorySelector from "../components/HistorySelector";
-import { SlidersHorizontal, RefreshCw, CheckCircle, Save } from "lucide-react";
+import { SlidersHorizontal, RefreshCw, CheckCircle, Save, Database, Plus } from "lucide-react";
 
 type Dimension = { axis: string; you: number; competitor: number };
 type Gap = { area: string; you: string; enterprise: string; gap: "Critical" | "High" | "Medium" | "Low"; action: string };
@@ -88,6 +88,8 @@ export default function CompetitorComparison() {
   const [simulating, setSimulating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  
+  const [hasSavedProfile, setHasSavedProfile] = useState(false);
 
   const loadInitial = async () => {
     setLoading(true);
@@ -103,8 +105,10 @@ export default function CompetitorComparison() {
       if (res.ok) {
         if (json.is_aggregated) {
           setData(json);
+          setHasSavedProfile(true);
         } else {
           setData(null);
+          setHasSavedProfile(false);
         }
       } else {
         setError(json.error || "Failed to check profile.");
@@ -165,6 +169,7 @@ export default function CompetitorComparison() {
       });
       if (res.ok) {
         setData(savedData);
+        setHasSavedProfile(true);
       } else {
         alert("Failed to save profile.");
       }
@@ -210,6 +215,21 @@ export default function CompetitorComparison() {
             <p className="cc-subtitle">Target specific competitors and simulate how adjusting your scale impacts your market standing.</p>
           </div>
           <HistorySelector />
+        </div>
+
+        {/* Action Bar for DB Switching */}
+        <div style={{ marginBottom: 24, display: "flex", gap: 12 }}>
+          {isAggregated ? (
+            <button className="cc-btn cc-btn-sec" style={{ width: "auto" }} onClick={() => setData(null)}>
+              <Plus size={16} /> Start New Comparison
+            </button>
+          ) : (
+            hasSavedProfile && (
+              <button className="cc-btn cc-btn-sec" style={{ width: "auto" }} onClick={loadInitial}>
+                <Database size={16} /> Restore Saved Profile
+              </button>
+            )
+          )}
         </div>
 
         <div className={isAggregated ? "" : "cc-grid"}>

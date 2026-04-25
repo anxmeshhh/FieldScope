@@ -34,6 +34,8 @@ interface HistoryEntry {
   capability_score: number;
   confidence: number;
   created_at: string;
+  has_risk_profile?: boolean;
+  has_competitor_profile?: boolean;
 }
 
 interface Rec {
@@ -1422,6 +1424,8 @@ export default function Dashboard() {
                     <th>Level</th>
                     <th>Score</th>
                     <th>Confidence</th>
+                    <th style={{ textAlign: "center" }}>Risk Radar</th>
+                    <th style={{ textAlign: "center" }}>Comp. Profile</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1439,6 +1443,12 @@ export default function Dashboard() {
                       </td>
                       <td className="db-history-score">{h.capability_score}<span style={{ color:"var(--muted3)", fontSize: 10 }}>/100</span></td>
                       <td className="db-history-date">{h.confidence}%</td>
+                      <td style={{ textAlign: "center" }}>
+                        {h.has_risk_profile ? <CheckCircle size={14} color="#10B981" style={{ display: "inline-block" }} /> : <span style={{ color: "var(--muted3)" }}>—</span>}
+                      </td>
+                      <td style={{ textAlign: "center" }}>
+                        {h.has_competitor_profile ? <CheckCircle size={14} color="#10B981" style={{ display: "inline-block" }} /> : <span style={{ color: "var(--muted3)" }}>—</span>}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
