@@ -1564,3 +1564,345 @@ Respond ONLY with a valid JSON object strictly matching this schema, without any
         return JsonResponse({"error": "Groq error.", "detail": str(e)}, status=502)
 
     return JsonResponse(data)
+
+
+# ─────────────────────────────────────────────
+# COMPETITOR COMPARISON (SIMULATION)
+# ─────────────────────────────────────────────
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def simulate_competitor(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return JsonResponse({"error": "Unauthorized."}, status=401)
+        
+    try:
+        data = json.loads(request.body)
+        hist_id = data.get("id")
+        sim_capital = data.get("capital")
+        sim_team = data.get("team_size")
+        sim_clients = data.get("clients")
+        comp_name = data.get("comp_name", "Enterprise Leader")
+        comp_scale = data.get("comp_scale", "Enterprise")
+        is_initial = data.get("initial", False)
+    except Exception as e:
+        return JsonResponse({"error": "Invalid request.", "detail": str(e)}, status=400)
+
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+        if hist_id:
+            cursor.execute('''
+                SELECT id, domain, business_level, capability_score, skills, tier,
+                       team_size, capital, revenue, clients, ai_competitor_profile
+                FROM assessments WHERE user_id = %s AND id = %s
+            ''', (user_id, hist_id))
+        else:
+            cursor.execute('''
+                SELECT id, domain, business_level, capability_score, skills, tier,
+                       team_size, capital, revenue, clients, ai_competitor_profile
+                FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
+            ''', (user_id,))
+        a = cursor.fetchone()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        return JsonResponse({"error": "DB error.", "detail": str(e)}, status=500)
+
+    if not a:
+        return JsonResponse({"error": "No assessment found."}, status=404)
+
+    # Return cached profile if initial load and it exists
+    if is_initial and a.get('ai_competitor_profile'):
+        cached = a['ai_competitor_profile']
+        if isinstance(cached, str):
+            cached = json.loads(cached)
+        cached["is_aggregated"] = True
+        return JsonResponse(cached)
+        
+    # Apply simulations if provided
+    active_capital = sim_capital if sim_capital is not None else a['capital']
+    active_team = sim_team if sim_team is not None else a['team_size']
+    active_clients = sim_clients if sim_clients is not None else a['clients']
+
+    prompt = f"""
+You are an expert business strategy AI. Compare an Indian '{a['domain']}' agency to a targeted competitor: {comp_name} ({comp_scale} scale).
+User's Simulated Profile:
+- Level: {a['business_level']}
+- Location: {a['tier']} tier
+- Capital: ₹{active_capital}
+- Team Size: {active_team}
+- Clients: {active_clients}
+- Skills: {a['skills']}
+
+Respond ONLY with a valid JSON object strictly matching this schema, without any markdown formatting or extra text:
+{{
+  "dimensions": [
+    {{"axis": "Team", "you": <number 0-100>, "competitor": <number 0-100>}},
+    {{"axis": "Capital", "you": <number 0-100>, "competitor": <number 0-100>}},
+    {{"axis": "Tools", "you": <number 0-100>, "competitor": <number 0-100>}},
+    {{"axis": "Network", "you": <number 0-100>, "competitor": <number 0-100>}},
+    {{"axis": "Portfolio", "you": <number 0-100>, "competitor": <number 0-100>}},
+    {{"axis": "Pricing", "you": <number 0-100>, "competitor": <number 0-100>}}
+  ],
+  "gaps": [
+    {{"area": "<Area Name>", "you": "<Your status string>", "enterprise": "<Target competitor status string>", "gap": "Critical|High|Medium|Low", "action": "<1 short action sentence>"}}
+  ]
+}}
+Generate exactly 5 items in the gaps array.
+"""
+    try:
+        chat = get_groq_client().chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=1024
+        )
+        raw = chat.choices[0].message.content.strip()
+        result = parse_groq_json(raw)
+        result["comp_name"] = comp_name
+        result["comp_scale"] = comp_scale
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return JsonResponse({"error": "Groq error.", "detail": str(e)}, status=502)
+
+    return JsonResponse(result)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def save_competitor_profile(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return JsonResponse({"error": "Unauthorized."}, status=401)
+        
+    try:
+        data = json.loads(request.body)
+        hist_id = data.get("id")
+        profile = data.get("profile")
+    except Exception as e:
+        return JsonResponse({"error": "Invalid JSON.", "detail": str(e)}, status=400)
+        
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        if hist_id:
+            cursor.execute("UPDATE assessments SET ai_competitor_profile = %s WHERE id = %s AND user_id = %s", (json.dumps(profile), hist_id, user_id))
+        else:
+            cursor.execute("UPDATE assessments SET ai_competitor_profile = %s WHERE user_id = %s ORDER BY created_at DESC LIMIT 1", (json.dumps(profile), user_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        return JsonResponse({"error": "DB error.", "detail": str(e)}, status=500)
+        
+    return JsonResponse({"success": True})
+
+
+# ─────────────────────────────────────────────
+# RISK RADAR
+# ─────────────────────────────────────────────
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def get_risk_radar(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return JsonResponse({"error": "Unauthorized."}, status=401)
+        
+    try:
+        data = json.loads(request.body)
+        hist_id = data.get("id")
+        sim_revenue = data.get("revenue")
+        sim_team = data.get("team_size")
+        sim_clients = data.get("clients")
+        is_initial = data.get("initial", False)
+    except Exception as e:
+        return JsonResponse({"error": "Invalid request.", "detail": str(e)}, status=400)
+
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+        if hist_id:
+            cursor.execute('''
+                SELECT id, domain, business_level, capability_score, skills, tier,
+                       team_size, capital, revenue, clients, ai_risk_profile
+                FROM assessments WHERE user_id = %s AND id = %s
+            ''', (user_id, hist_id))
+        else:
+            cursor.execute('''
+                SELECT id, domain, business_level, capability_score, skills, tier,
+                       team_size, capital, revenue, clients, ai_risk_profile
+                FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
+            ''', (user_id,))
+        a = cursor.fetchone()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        return JsonResponse({"error": "DB error.", "detail": str(e)}, status=500)
+
+    if not a:
+        return JsonResponse({"error": "No assessment found."}, status=404)
+
+    # Return cached profile if initial load and it exists
+    if is_initial and a.get('ai_risk_profile'):
+        cached = a['ai_risk_profile']
+        if isinstance(cached, str):
+            cached = json.loads(cached)
+        cached["is_aggregated"] = True
+        return JsonResponse(cached)
+
+    active_revenue = sim_revenue if sim_revenue is not None else a['revenue']
+    active_team = sim_team if sim_team is not None else a['team_size']
+    active_clients = sim_clients if sim_clients is not None else a['clients']
+
+    prompt = f"""
+You are an expert Indian business risk analyst. Identify risks for this '{a['domain']}' agency based on the following simulated profile:
+Profile:
+- Level: {a['business_level']}
+- Location: {a['tier']} tier
+- Revenue: ₹{active_revenue}
+- Clients: {active_clients}
+- Team Size: {active_team}
+- Skills: {a['skills']}
+
+Respond ONLY with a valid JSON object strictly matching this schema, without any markdown formatting or extra text:
+{{
+  "summary": {{
+    "highRisks": <number>,
+    "mediumRisks": <number>,
+    "resolved": <number>,
+    "score": <number 0-100>
+  }},
+  "categories": [
+    {{
+      "category": "Legal & Compliance",
+      "severity": "High|Medium|Low",
+      "risks": [
+        {{"title": "<Risk Title>", "desc": "<Risk description>", "action": "<Action to take>"}}
+      ]
+    }},
+    {{
+      "category": "Cash Flow Danger",
+      "severity": "High|Medium|Low",
+      "risks": [
+        {{"title": "<Risk Title>", "desc": "<Risk description>", "action": "<Action to take>"}}
+      ]
+    }},
+    {{
+      "category": "Operational Risk",
+      "severity": "High|Medium|Low",
+      "risks": [
+        {{"title": "<Risk Title>", "desc": "<Risk description>", "action": "<Action to take>"}}
+      ]
+    }},
+    {{
+      "category": "Market Saturation",
+      "severity": "High|Medium|Low",
+      "risks": [
+        {{"title": "<Risk Title>", "desc": "<Risk description>", "action": "<Action to take>"}}
+      ]
+    }}
+  ]
+}}
+"""
+    try:
+        chat = get_groq_client().chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=1024
+        )
+        raw = chat.choices[0].message.content.strip()
+        result = parse_groq_json(raw)
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return JsonResponse({"error": "Groq error.", "detail": str(e)}, status=502)
+
+    return JsonResponse(result)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def save_risk_profile(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return JsonResponse({"error": "Unauthorized."}, status=401)
+        
+    try:
+        data = json.loads(request.body)
+        hist_id = data.get("id")
+        simulations = data.get("simulations", [])
+    except Exception as e:
+        return JsonResponse({"error": "Invalid JSON.", "detail": str(e)}, status=400)
+        
+    if not simulations:
+        return JsonResponse({"error": "No simulations provided."}, status=400)
+
+    # Aggregate
+    total_score = 0
+    total_high = 0
+    total_medium = 0
+    total_resolved = 0
+    
+    category_map = {
+        "Legal & Compliance": {"severity": "Low", "risks": {}},
+        "Cash Flow Danger": {"severity": "Low", "risks": {}},
+        "Operational Risk": {"severity": "Low", "risks": {}},
+        "Market Saturation": {"severity": "Low", "risks": {}}
+    }
+    
+    severity_rank = {"High": 3, "Medium": 2, "Low": 1}
+    
+    for sim in simulations:
+        summary = sim.get("summary", {})
+        total_score += summary.get("score", 0)
+        total_high += summary.get("highRisks", 0)
+        total_medium += summary.get("mediumRisks", 0)
+        total_resolved += summary.get("resolved", 0)
+        
+        cats = sim.get("categories", [])
+        for c in cats:
+            cname = c.get("category")
+            if cname in category_map:
+                csev = c.get("severity", "Low")
+                if severity_rank.get(csev, 1) > severity_rank.get(category_map[cname]["severity"], 1):
+                    category_map[cname]["severity"] = csev
+                    
+                for r in c.get("risks", []):
+                    rtitle = r.get("title")
+                    if rtitle and rtitle not in category_map[cname]["risks"]:
+                        category_map[cname]["risks"][rtitle] = r
+                        
+    num_sims = len(simulations)
+    aggregated = {
+        "is_aggregated": True,
+        "summary": {
+            "score": round(total_score / num_sims),
+            "highRisks": round(total_high / num_sims),
+            "mediumRisks": round(total_medium / num_sims),
+            "resolved": round(total_resolved / num_sims)
+        },
+        "categories": []
+    }
+    
+    for cname, cdata in category_map.items():
+        aggregated["categories"].append({
+            "category": cname,
+            "severity": cdata["severity"],
+            "risks": list(cdata["risks"].values())
+        })
+
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        if hist_id:
+            cursor.execute("UPDATE assessments SET ai_risk_profile = %s WHERE id = %s AND user_id = %s", (json.dumps(aggregated), hist_id, user_id))
+        else:
+            cursor.execute("UPDATE assessments SET ai_risk_profile = %s WHERE user_id = %s ORDER BY created_at DESC LIMIT 1", (json.dumps(aggregated), user_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        return JsonResponse({"error": "DB error.", "detail": str(e)}, status=500)
+        
+    return JsonResponse({"success": True, "aggregated": aggregated})

@@ -22,7 +22,10 @@ urlpatterns = [
     path("market-intelligence/",     views.get_market_intelligence),
     
     path("simulate-competitor/",     views.simulate_competitor),
+    path("save-competitor-profile/", views.save_competitor_profile),
+    
     path("risk-radar/",              views.get_risk_radar),
+    path("save-risk-profile/",       views.save_risk_profile),
 
     path("industries/",              views.get_industries),
     path("industries/personalized/", views.get_personalized_industries),
