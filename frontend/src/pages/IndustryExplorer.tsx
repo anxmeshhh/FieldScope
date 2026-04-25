@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import HistorySelector from "../components/HistorySelector";
 import {
   Search, ChevronRight, RefreshCw, Sparkles, MapPin,
   TrendingUp, Target, ArrowUpRight, Filter, X,
@@ -636,7 +637,7 @@ export default function IndustryExplorer() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [q]);
 
   // ── animate gen steps while generating
   useEffect(() => {
@@ -680,7 +681,7 @@ export default function IndustryExplorer() {
     }
   };
 
-  useEffect(() => { fetchIndustries(); }, []);
+  useEffect(() => { fetchIndustries(); }, [q]);
 
   // poll while generating
   useEffect(() => {
@@ -760,7 +761,8 @@ export default function IndustryExplorer() {
               </div>
             </div>
 
-            <div className="ie-head-right">
+            <div className="ie-head-right" style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+              <HistorySelector />
               <button
                 className="ie-refresh"
                 onClick={() => fetchIndustries(true)}

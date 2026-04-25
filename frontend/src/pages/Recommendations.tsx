@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import HistorySelector from "../components/HistorySelector";
 import {
   CheckCircle, XCircle, AlertTriangle, ArrowRight,
   Loader2, Zap, TrendingUp, Target, Map,
@@ -412,11 +413,12 @@ export default function Recommendations() {
   const [error, setError]     = useState("");
 
   useEffect(() => {
+    setLoading(true);
     fetch(`${API}/recommendations/${q}`, { credentials: "include" })
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then(d => { setData(d); setLoading(false); })
       .catch(e => { setError(e.message); setLoading(false); });
-  }, []);
+  }, [q]);
 
   const priorityStyle = (p: string) => {
     if (p === "high")   return { bg: "#EFF6FF", color: "#2563EB", border: "#BFDBFE", barColor: "#2563EB" };
@@ -445,9 +447,12 @@ export default function Recommendations() {
               Personalised growth actions derived from your capability score — ranked by potential impact for your business.
             </div>
           </div>
-          <div className="rec-logo">
-            <div className="rec-logo-icon"><Zap size={15} color="#E85D04" /></div>
-            <div className="rec-logo-text">Field<em>Scope</em></div>
+          <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+            <HistorySelector />
+            <div className="rec-logo">
+              <div className="rec-logo-icon"><Zap size={15} color="#E85D04" /></div>
+              <div className="rec-logo-text">Field<em>Scope</em></div>
+            </div>
           </div>
         </div>
 

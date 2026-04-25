@@ -42,8 +42,8 @@ const css = `
   .id-wrap {
     padding: 36px 40px 80px;
     font-family: 'DM Sans', sans-serif;
-    color: #F0F0F0;
-    background: #080808;
+    color: #1E293B;
+    background: #F8FAFC;
     min-height: 100%;
   }
 
@@ -57,24 +57,24 @@ const css = `
 
   .id-back {
     display: inline-flex; align-items: center; gap: 8px;
-    background: transparent; border: 1px solid #1A1A1A;
+    background: transparent; border: 1px solid #CBD5E1;
     border-radius: 40px; padding: 9px 18px;
-    color: #666; font-size: 12px; font-weight: 600;
+    color: #64748B; font-size: 12px; font-weight: 600;
     font-family: 'DM Sans', sans-serif; cursor: pointer;
     transition: all 0.2s; letter-spacing: 0.04em;
   }
 
-  .id-back:hover { border-color: rgba(232,93,4,0.35); color: #E85D04; }
+  .id-back:hover { border-color: #93C5FD; color: #2563EB; background: #EFF6FF; }
 
   .id-refresh {
     display: inline-flex; align-items: center; gap: 7px;
-    background: transparent; border: 1px solid #1A1A1A;
+    background: transparent; border: 1px solid #CBD5E1;
     border-radius: 40px; padding: 9px 18px;
-    color: #555; font-size: 12px; font-weight: 600;
+    color: #64748B; font-size: 12px; font-weight: 600;
     font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.2s;
   }
 
-  .id-refresh:hover { border-color: rgba(232,93,4,0.3); color: #E85D04; }
+  .id-refresh:hover { border-color: #93C5FD; color: #2563EB; background: #EFF6FF; }
   .id-refresh:disabled { opacity: 0.35; cursor: not-allowed; }
 
   @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
@@ -83,24 +83,24 @@ const css = `
   /* ── HERO ── */
   .id-hero {
     padding-bottom: 28px; margin-bottom: 28px;
-    border-bottom: 1px solid #1A1A1A; position: relative;
+    border-bottom: 1px solid #E2E8F0; position: relative;
   }
 
   .id-hero::after {
     content: '';
-    position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(232,93,4,0.25), transparent);
+    position: absolute; bottom: -1px; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(37,99,235,0.25), transparent);
   }
 
   .id-eyebrow {
     display: inline-flex; align-items: center; gap: 7px;
     font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
-    text-transform: uppercase; color: #E85D04; margin-bottom: 12px;
+    text-transform: uppercase; color: #2563EB; margin-bottom: 12px;
   }
 
   .id-eyebrow-dot {
     width: 5px; height: 5px; border-radius: 50%;
-    background: #E85D04; box-shadow: 0 0 8px #E85D04;
+    background: #2563EB; box-shadow: 0 0 8px #2563EB;
     animation: blink 2s infinite;
   }
 
@@ -108,61 +108,63 @@ const css = `
 
   .id-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 52px; line-height: 0.92; color: #F0F0F0;
+    font-size: 52px; line-height: 0.92; color: #0F172A;
     letter-spacing: 0.02em; margin-bottom: 8px;
   }
 
-  .id-title span { color: #E85D04; }
-  .id-tagline { font-size: 13px; color: #888; font-weight: 300; margin-bottom: 20px; }
+  .id-title span { color: #2563EB; }
+  .id-tagline { font-size: 13px; color: #64748B; font-weight: 500; margin-bottom: 20px; }
 
   .id-hero-stats { display: flex; gap: 10px; flex-wrap: wrap; }
 
   .id-hero-stat {
-    background: #0F0F0F; border: 1px solid #1A1A1A;
-    border-radius: 4px; padding: 10px 16px;
+    background: #FFFFFF; border: 1px solid #E2E8F0;
+    border-radius: 6px; padding: 10px 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
   }
 
   .id-hero-stat-label {
     font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
-    text-transform: uppercase; color: #555; margin-bottom: 3px;
+    text-transform: uppercase; color: #64748B; margin-bottom: 3px;
   }
 
   .id-hero-stat-val {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px; letter-spacing: 0.04em;
+    font-size: 18px; letter-spacing: 0.04em; color: #0F172A;
   }
 
   /* ── FOR YOU ── */
   .id-foryou {
-    background: rgba(232,93,4,0.06); border: 1px solid rgba(232,93,4,0.2);
-    border-radius: 4px; padding: 16px 18px; margin-bottom: 24px;
+    background: #EFF6FF; border: 1px solid #BFDBFE;
+    border-radius: 8px; padding: 16px 18px; margin-bottom: 24px;
     display: flex; gap: 12px; align-items: flex-start;
     position: relative; overflow: hidden;
   }
 
   .id-foryou::before {
     content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, #E85D04, transparent);
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #2563EB, transparent);
   }
 
   .id-foryou-icon {
     width: 30px; height: 30px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    background: rgba(232,93,4,0.1); border: 1px solid rgba(232,93,4,0.25); border-radius: 8px;
+    background: #DBEAFE; border: 1px solid #93C5FD; border-radius: 8px; color: #2563EB;
   }
 
   .id-foryou-label {
     font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
-    text-transform: uppercase; color: #E85D04; margin-bottom: 4px;
+    text-transform: uppercase; color: #2563EB; margin-bottom: 4px;
   }
 
-  .id-foryou-text { font-size: 13px; color: #C8C8C8; line-height: 1.6; }
+  .id-foryou-text { font-size: 13px; color: #334155; line-height: 1.6; font-weight: 500; }
 
   /* ── SECTION CARD ── */
   .id-card {
-    background: #0F0F0F; border: 1px solid #1A1A1A;
-    border-radius: 4px; padding: 24px; margin-bottom: 16px;
+    background: #FFFFFF; border: 1px solid #E2E8F0;
+    border-radius: 12px; padding: 24px; margin-bottom: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
   }
 
   .id-section-head {
@@ -172,79 +174,80 @@ const css = `
   .id-section-icon {
     width: 30px; height: 30px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    background: rgba(232,93,4,0.07); border: 1px solid rgba(232,93,4,0.14); border-radius: 8px;
+    background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; color: #2563EB;
   }
 
   .id-section-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px; color: #F0F0F0; letter-spacing: 0.04em;
+    font-size: 20px; color: #0F172A; letter-spacing: 0.04em;
   }
 
-  .id-overview-text { font-size: 13px; color: #C0C0C0; line-height: 1.8; }
+  .id-overview-text { font-size: 14px; color: #475569; line-height: 1.8; }
 
   /* ── LEVEL TABS ── */
   .id-tabs {
     display: flex; gap: 4px;
-    background: #0F0F0F; border: 1px solid #1A1A1A;
-    border-radius: 4px; padding: 5px; margin-bottom: 12px;
+    background: #F1F5F9; border: 1px solid #E2E8F0;
+    border-radius: 6px; padding: 5px; margin-bottom: 16px;
   }
 
   .id-tab {
     flex: 1; padding: 10px 8px; text-align: center;
-    background: transparent; border: 1px solid transparent; border-radius: 3px;
-    font-size: 12px; font-weight: 600; color: #444;
+    background: transparent; border: 1px solid transparent; border-radius: 4px;
+    font-size: 13px; font-weight: 600; color: #64748B;
     font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.2s;
   }
 
   .id-tab.active {
-    background: #181818; color: #E85D04;
-    border-color: rgba(232,93,4,0.2);
-    box-shadow: 0 0 16px rgba(232,93,4,0.08);
+    background: #FFFFFF; color: #2563EB;
+    border-color: #E2E8F0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
 
   /* ── LEVEL STATS ROW ── */
   .id-level-stats {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;
   }
 
   @media (max-width: 640px) { .id-level-stats { grid-template-columns: 1fr 1fr; } }
 
   .id-level-stat {
-    background: #0F0F0F; border: 1px solid #1A1A1A; border-radius: 4px; padding: 12px 14px;
+    background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px;
   }
 
   .id-level-stat-label {
     font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
-    text-transform: uppercase; color: #555; margin-bottom: 4px;
+    text-transform: uppercase; color: #64748B; margin-bottom: 4px;
   }
 
   .id-level-stat-val {
-    font-family: 'Bebas Neue', sans-serif; font-size: 17px; color: #E85D04; letter-spacing: 0.04em;
+    font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: #2563EB; letter-spacing: 0.04em;
   }
 
   /* ── LEVEL DETAIL CARD ── */
   .id-level-card {
-    background: #0F0F0F; border: 1px solid #1A1A1A;
-    border-radius: 4px; padding: 22px; margin-bottom: 16px;
+    background: #FFFFFF; border: 1px solid #E2E8F0;
+    border-radius: 8px; padding: 24px; margin-bottom: 16px;
     position: relative; overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
   }
 
   .id-level-card::before {
     content: '';
-    position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, #E85D04 40%, #FF6B1A 60%, transparent);
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, transparent, #2563EB 40%, #60A5FA 60%, transparent);
   }
 
   .id-level-name {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 24px; color: #E85D04; letter-spacing: 0.06em; margin-bottom: 6px;
+    font-size: 24px; color: #2563EB; letter-spacing: 0.06em; margin-bottom: 6px;
   }
 
-  .id-level-desc { font-size: 13px; color: #C0C0C0; line-height: 1.6; margin-bottom: 12px; }
+  .id-level-desc { font-size: 14px; color: #334155; line-height: 1.6; margin-bottom: 16px; font-weight: 500; }
 
   .id-level-milestone {
-    font-size: 12px; color: #888; padding-left: 12px;
-    border-left: 2px solid rgba(232,93,4,0.5); line-height: 1.5;
+    font-size: 13px; color: #475569; padding-left: 12px;
+    border-left: 3px solid #93C5FD; line-height: 1.5; font-weight: 500; background: #F8FAFC; padding: 10px 12px; border-radius: 0 6px 6px 0;
   }
 
   /* ── BOTTOM TWO COL ── */
@@ -259,61 +262,61 @@ const css = `
   /* Players */
   .id-player {
     display: flex; gap: 12px; align-items: flex-start;
-    padding: 11px 0; border-bottom: 1px solid #141414;
+    padding: 12px 0; border-bottom: 1px solid #E2E8F0;
   }
 
   .id-player:last-child { border-bottom: none; padding-bottom: 0; }
   .id-player:first-child { padding-top: 0; }
 
   .id-player-avatar {
-    width: 34px; height: 34px; flex-shrink: 0;
+    width: 36px; height: 36px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    background: #141414; border: 1px solid #1A1A1A; border-radius: 8px;
-    font-family: 'Bebas Neue', sans-serif; font-size: 13px; color: #E85D04;
+    background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: #2563EB;
   }
 
-  .id-player-name { font-size: 13px; font-weight: 600; color: #D0D0D0; margin-bottom: 2px; }
+  .id-player-name { font-size: 14px; font-weight: 600; color: #0F172A; margin-bottom: 2px; }
 
   .id-player-type {
     font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
-    text-transform: uppercase; color: #444; margin-bottom: 3px;
+    text-transform: uppercase; color: #64748B; margin-bottom: 4px;
   }
 
-  .id-player-note { font-size: 11px; color: #777; line-height: 1.4; }
+  .id-player-note { font-size: 12px; color: #475569; line-height: 1.5; }
 
   /* Revenue */
   .id-rev-item {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 13px 0; border-bottom: 1px solid #141414;
+    padding: 14px 0; border-bottom: 1px solid #E2E8F0;
   }
 
   .id-rev-item:last-child { border-bottom: none; padding-bottom: 0; }
   .id-rev-item:first-child { padding-top: 0; }
 
   .id-rev-level {
-    font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: #777; letter-spacing: 0.06em;
+    font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: #64748B; letter-spacing: 0.06em;
   }
 
   .id-rev-monthly {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px; color: #E85D04; letter-spacing: 0.04em; line-height: 1; text-align: right;
+    font-size: 22px; color: #2563EB; letter-spacing: 0.04em; line-height: 1; text-align: right;
   }
 
-  .id-rev-annual { font-size: 11px; color: #555; margin-top: 2px; text-align: right; }
+  .id-rev-annual { font-size: 12px; color: #64748B; margin-top: 4px; text-align: right; font-weight: 500; }
 
   /* ── CTA ── */
   .id-assess-btn {
     display: block; width: fit-content; margin: 32px auto 0;
-    padding: 14px 32px; background: #E85D04; color: #fff;
+    padding: 14px 36px; background: #2563EB; color: #fff;
     border: none; border-radius: 40px;
-    font-size: 13px; font-weight: 700; letter-spacing: 0.05em;
+    font-size: 14px; font-weight: 700; letter-spacing: 0.05em;
     font-family: 'DM Sans', sans-serif; cursor: pointer;
-    transition: all 0.22s; box-shadow: 0 0 28px rgba(232,93,4,0.3);
+    transition: all 0.22s; box-shadow: 0 4px 12px rgba(37,99,235,0.25);
   }
 
   .id-assess-btn:hover {
-    background: #FF6B1A; transform: translateY(-2px);
-    box-shadow: 0 0 44px rgba(232,93,4,0.5);
+    background: #1D4ED8; transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(37,99,235,0.35);
   }
 
   /* ── LOADING ── */
@@ -323,17 +326,17 @@ const css = `
   }
 
   .id-loading-ring {
-    width: 56px; height: 56px; border-radius: 50%;
-    border: 2px solid #1A1A1A; border-top-color: #E85D04;
+    width: 64px; height: 64px; border-radius: 50%;
+    border: 3px solid #E2E8F0; border-top-color: #2563EB;
     animation: spin 1s linear infinite;
   }
 
   .id-loading-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 26px; color: #F0F0F0; letter-spacing: 0.04em;
+    font-size: 28px; color: #0F172A; letter-spacing: 0.04em;
   }
 
-  .id-loading-sub { font-size: 13px; color: #555; max-width: 300px; line-height: 1.6; }
+  .id-loading-sub { font-size: 14px; color: #64748B; max-width: 320px; line-height: 1.6; }
 `;
 
 export default function IndustryDetail() {
@@ -366,7 +369,7 @@ export default function IndustryDetail() {
     }
   };
 
-  useEffect(() => { fetchDetail(); }, [slug]);
+  useEffect(() => { fetchDetail(); }, [slug, q]);
 
   if (loading) return (
     <>
@@ -388,10 +391,10 @@ export default function IndustryDetail() {
       <style>{css}</style>
       <div className="id-wrap">
         <div className="id-loading">
-          <div className="id-loading-title" style={{ color: "#E85D04" }}>Error</div>
+          <div className="id-loading-title" style={{ color: "#2563EB" }}>Error</div>
           <div className="id-loading-sub">{error || "Something went wrong."}</div>
           <button
-            style={{ marginTop: 8, padding: "10px 24px", background: "#E85D04", border: "none", borderRadius: 40, color: "#fff", fontFamily: "DM Sans", fontWeight: 700, cursor: "pointer" }}
+            style={{ marginTop: 8, padding: "10px 24px", background: "#2563EB", border: "none", borderRadius: 40, color: "#fff", fontFamily: "DM Sans", fontWeight: 700, cursor: "pointer" }}
             onClick={() => navigate(-1)}
           >← Go Back</button>
         </div>
