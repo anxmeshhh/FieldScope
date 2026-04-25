@@ -1408,3 +1408,159 @@ def get_task_progress(request):
         "progress":      [{"week_index": r["week_index"], "task_index": r["task_index"]} for r in rows],
         "assessment_id": assessment_id,
     })
+
+# ─────────────────────────────────────────────
+# AI ADVISOR (CHAT)
+# ─────────────────────────────────────────────
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def chat_advisor(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return JsonResponse({"error": "Unauthorized."}, status=401)
+        
+    try:
+        data = json.loads(request.body)
+        message = data.get("message", "").strip()
+        hist_id = data.get("id")
+    except Exception as e:
+        return JsonResponse({"error": "Invalid request.", "detail": str(e)}, status=400)
+
+    if not message:
+        return JsonResponse({"error": "Message is empty."}, status=400)
+
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+        if hist_id:
+            cursor.execute('''
+                SELECT id, domain, business_level, capability_score, skills, tier,
+                       team_size, capital, revenue, clients
+                FROM assessments WHERE user_id = %s AND id = %s
+            ''', (user_id, hist_id))
+        else:
+            cursor.execute('''
+                SELECT id, domain, business_level, capability_score, skills, tier,
+                       team_size, capital, revenue, clients
+                FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
+            ''', (user_id,))
+        a = cursor.fetchone()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        return JsonResponse({"error": "DB error.", "detail": str(e)}, status=500)
+
+    if not a:
+        return JsonResponse({"error": "No assessment found."}, status=404)
+
+    prompt = f"""
+You are the FieldScope AI Business Advisor, an expert consultant for Indian entrepreneurs.
+Your client's business profile:
+- Industry: {a['domain']}
+- Level: {a['business_level']} (Score: {a['capability_score']}/100)
+- Skills: {a['skills']}
+- Team Size: {a['team_size']} people
+- Location: {a['tier']}
+- Monthly Capital: ₹{a['capital']}
+- Monthly Revenue: ₹{a['revenue']}
+- Active Clients: {a['clients']}
+
+The client asks: "{message}"
+
+Provide a concise, practical, and highly relevant answer based on their specific profile and the Indian market context. Limit your response to 2-3 paragraphs.
+"""
+    try:
+        chat = get_groq_client().chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=1024
+        )
+        reply = chat.choices[0].message.content.strip()
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return JsonResponse({"error": "Groq error.", "detail": str(e)}, status=502)
+
+    return JsonResponse({"reply": reply})
+
+
+# ─────────────────────────────────────────────
+# MARKET INTELLIGENCE
+# ─────────────────────────────────────────────
+
+@require_http_methods(["GET"])
+def get_market_intelligence(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return JsonResponse({"error": "Unauthorized."}, status=401)
+        
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+        hist_id = request.GET.get("id")
+        if hist_id:
+            cursor.execute('''
+                SELECT id, domain, business_level, capability_score, skills, tier,
+                       team_size, capital, revenue, clients
+                FROM assessments WHERE user_id = %s AND id = %s
+            ''', (user_id, hist_id))
+        else:
+            cursor.execute('''
+                SELECT id, domain, business_level, capability_score, skills, tier,
+                       team_size, capital, revenue, clients
+                FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
+            ''', (user_id,))
+        a = cursor.fetchone()
+        cursor.close()
+        conn.close()
+    except Exception as e:
+        return JsonResponse({"error": "DB error.", "detail": str(e)}, status=500)
+
+    if not a:
+        return JsonResponse({"error": "No assessment found."}, status=404)
+
+    prompt = f"""
+You are an expert market analyst for the Indian market.
+Generate real-time market intelligence data tailored to a {a['business_level']} agency in the '{a['domain']}' sector operating in {a['tier']} tier cities.
+
+Respond ONLY with a valid JSON object strictly matching this schema, without any markdown formatting or extra text:
+{{
+  "trendData": [
+    {{"month": "Aug", "core_service": <number 0-100>, "secondary_service": <number 0-100>, "emerging_service": <number 0-100>}},
+    {{"month": "Sep", "core_service": <number 0-100>, "secondary_service": <number 0-100>, "emerging_service": <number 0-100>}},
+    {{"month": "Oct", "core_service": <number 0-100>, "secondary_service": <number 0-100>, "emerging_service": <number 0-100>}},
+    {{"month": "Nov", "core_service": <number 0-100>, "secondary_service": <number 0-100>, "emerging_service": <number 0-100>}},
+    {{"month": "Dec", "core_service": <number 0-100>, "secondary_service": <number 0-100>, "emerging_service": <number 0-100>}},
+    {{"month": "Jan", "core_service": <number 0-100>, "secondary_service": <number 0-100>, "emerging_service": <number 0-100>}}
+  ],
+  "pricingData": [
+    {{"service": "<service name>", "beginner": <number>, "intermediate": <number>, "enterprise": <number>}},
+    {{"service": "<service name>", "beginner": <number>, "intermediate": <number>, "enterprise": <number>}},
+    {{"service": "<service name>", "beginner": <number>, "intermediate": <number>, "enterprise": <number>}},
+    {{"service": "<service name>", "beginner": <number>, "intermediate": <number>, "enterprise": <number>}}
+  ],
+  "heatmapData": [
+    {{"city": "<Indian City Name>", "demand": <number 0-100>, "competition": "High|Medium|Low", "opportunity": "High|Medium|Very High"}},
+    {{"city": "<Indian City Name>", "demand": <number 0-100>, "competition": "High|Medium|Low", "opportunity": "High|Medium|Very High"}},
+    {{"city": "<Indian City Name>", "demand": <number 0-100>, "competition": "High|Medium|Low", "opportunity": "High|Medium|Very High"}},
+    {{"city": "<Indian City Name>", "demand": <number 0-100>, "competition": "High|Medium|Low", "opportunity": "High|Medium|Very High"}},
+    {{"city": "<Indian City Name>", "demand": <number 0-100>, "competition": "High|Medium|Low", "opportunity": "High|Medium|Very High"}},
+    {{"city": "<Indian City Name>", "demand": <number 0-100>, "competition": "High|Medium|Low", "opportunity": "High|Medium|Very High"}}
+  ]
+}}
+"""
+    try:
+        chat = get_groq_client().chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=1024
+        )
+        raw = chat.choices[0].message.content.strip()
+        data = parse_groq_json(raw)
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return JsonResponse({"error": "Groq error.", "detail": str(e)}, status=502)
+
+    return JsonResponse(data)

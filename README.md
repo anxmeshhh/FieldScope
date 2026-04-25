@@ -110,6 +110,8 @@ FieldScope enforces a strict **"White and Blue" Premium Aesthetic** (`#F8FAFC` b
 3. **Assessment History Panel (`Dashboard.tsx`)**: A dynamic data-grid integrated into the dashboard that fetches the temporal sequence of the user's assessments (via the append-only ledger), enabling long-term capability progression tracking.
 4. **Industry Explorer (`IndustryExplorer.tsx`)**: Passes the user's skills through the Groq LLM to calculate pivot viability and generate cross-industry transition opportunities.
 5. **AI Recommendations (`Recommendations.tsx`)**: The strategic heart. Decodes LLaMA's output into a prioritized grid (High/Medium/Low priority styling) and a "Risk Avoidance" list to prevent common SME pitfalls.
+6. **AI Business Advisor (`AIChat.tsx`)**: A context-aware RAG-powered chatbot. It dynamically reads the active `history_id` to provide tailored, highly specific business advice using the Groq API.
+7. **Market Intelligence (`MarketIntelligence.tsx`)**: Real-time analytical dashboard generating live market demand trends, precise pricing benchmarks, and geographic heatmaps based on the user's assessment context.
 
 ---
 

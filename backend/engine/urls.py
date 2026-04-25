@@ -18,6 +18,12 @@ urlpatterns = [
     path("recommendations/",         views.get_recommendations),
     path("assessments/history/",     views.assessment_history),
 
+    path("chat/",                    views.chat_advisor),
+    path("market-intelligence/",     views.get_market_intelligence),
+    
+    path("simulate-competitor/",     views.simulate_competitor),
+    path("risk-radar/",              views.get_risk_radar),
+
     path("industries/",              views.get_industries),
     path("industries/personalized/", views.get_personalized_industries),
     path("industries/refresh/",      views.refresh_personalized_industries),
