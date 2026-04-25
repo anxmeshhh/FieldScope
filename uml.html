@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FieldScope — UML Diagrams</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #080808;
+    color: #F0F0F0;
+    font-family: 'DM Sans', sans-serif;
+    padding: 48px 40px 80px;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(232,93,4,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,93,4,0.025) 1px, transparent 1px);
+    background-size: 52px 52px;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; }
+
+  /* PAGE HEADER */
+  .page-eyebrow {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.16em;
+    text-transform: uppercase; color: #E85D04;
+    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+  }
+  .page-eyebrow-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #E85D04; box-shadow: 0 0 10px #E85D04;
+    animation: blink 2s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  .page-title {
+    font-family: 'Bebas Neue'; font-size: 52px; line-height: 0.92;
+    letter-spacing: 0.02em; margin-bottom: 8px;
+  }
+  .page-title em { color: #E85D04; font-style: normal; }
+  .page-sub { font-size: 13px; color: #888; margin-bottom: 48px; }
+
+  /* DIAGRAM SECTION */
+  .diagram-section { margin-bottom: 56px; }
+
+  .diagram-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: #E85D04;
+    background: rgba(232,93,4,0.07); border: 1px solid rgba(232,93,4,0.18);
+    padding: 4px 12px; border-radius: 3px; margin-bottom: 12px;
+  }
+  .diagram-title {
+    font-family: 'Bebas Neue'; font-size: 32px; letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+  .diagram-desc { font-size: 12px; color: #888; margin-bottom: 20px; line-height: 1.6; }
+
+  .diagram-box {
+    background: #0D0D0D; border: 1px solid #1C1C1C; border-radius: 4px;
+    overflow: hidden; position: relative;
+  }
+  .diagram-box::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #E85D04 40%, #FF8C42 70%, transparent);
+  }
+  .diagram-box svg { display: block; width: 100%; }
+
+  /* SVG shared styles */
+  .uml-text       { font-family: 'DM Sans', sans-serif; fill: #F0F0F0; }
+  .uml-label      { font-family: 'DM Sans', sans-serif; fill: #AAA; font-size: 11px; }
+  .uml-mono       { font-family: 'DM Mono', monospace; fill: #E85D04; }
+  .uml-dim        { font-family: 'DM Sans', sans-serif; fill: #555; font-size: 10px; }
+  .uml-accent     { fill: #E85D04; }
+  .uml-line       { stroke: #2A2A2A; stroke-width: 1; fill: none; }
+  .uml-line-org   { stroke: #E85D04; stroke-width: 1.5; fill: none; }
+  .uml-line-dash  { stroke: #333; stroke-width: 1; fill: none; stroke-dasharray: 5 4; }
+  .uml-box        { fill: #111; stroke: #1E1E1E; stroke-width: 1; rx: 3; }
+  .uml-box-orange { fill: rgba(232,93,4,0.08); stroke: rgba(232,93,4,0.3); stroke-width: 1; }
+  .uml-box-dark   { fill: #0C0C0C; stroke: #1A1A1A; stroke-width: 1; }
+  .uml-actor      { fill: #0C0C0C; stroke: #E85D04; stroke-width: 1.5; }
+  .uml-oval       { fill: rgba(232,93,4,0.06); stroke: rgba(232,93,4,0.35); stroke-width: 1; }
+  .uml-oval-dim   { fill: #111; stroke: #222; stroke-width: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- PAGE HEADER -->
+  <div class="page-eyebrow"><div class="page-eyebrow-dot"></div> FieldScope · UML Documentation</div>
+  <div class="page-title">System <em>Diagrams</em></div>
+  <div class="page-sub">4 UML diagrams covering actors, data models, interaction flows and database structure.</div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- DIAGRAM 1 — USE CASE                                       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="diagram-section">
+    <div class="diagram-label">Diagram 01</div>
+    <div class="diagram-title">Use Case Diagram</div>
+    <div class="diagram-desc">Shows every actor in the system and the actions they can perform. Two actors — User and Groq AI — interact with the FieldScope platform across 4 module phases.</div>
+    <div class="diagram-box">
+      <svg viewBox="0 0 1060 620" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- BG grid lines -->
+        <defs>
+          <pattern id="grid1" width="52" height="52" patternUnits="userSpaceOnUse">
+            <path d="M52 0H0V52" fill="none" stroke="rgba(232,93,4,0.04)" stroke-width="1"/>
+          </pattern>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#2A2A2A"/>
+          </marker>
+          <marker id="arr-org" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#E85D04"/>
+          </marker>
+          <marker id="arr-dash" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#444"/>
+          </marker>
+        </defs>
+        <rect width="1060" height="620" fill="url(#grid1)"/>
+
+        <!-- System boundary -->
+        <rect x="200" y="30" width="660" height="560" rx="4" fill="none" stroke="#1C1C1C" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <text x="530" y="22" text-anchor="middle" font-family="DM Sans" font-size="10" font-weight="700" fill="#333" letter-spacing="0.14em">FIELDSCOPE SYSTEM BOUNDARY</text>
+
+        <!-- ACTOR: User (left) -->
+        <!-- head -->
+        <circle cx="80" cy="100" r="18" fill="none" stroke="#E85D04" stroke-width="1.5"/>
+        <!-- body -->
+        <line x1="80" y1="118" x2="80" y2="165" stroke="#E85D04" stroke-width="1.5"/>
+        <!-- arms -->
+        <line x1="50" y1="135" x2="110" y2="135" stroke="#E85D04" stroke-width="1.5"/>
+        <!-- legs -->
+        <line x1="80" y1="165" x2="55" y2="200" stroke="#E85D04" stroke-width="1.5"/>
+        <line x1="80" y1="165" x2="105" y2="200" stroke="#E85D04" stroke-width="1.5"/>
+        <text x="80" y="218" text-anchor="middle" font-family="DM Sans" font-size="12" font-weight="700" fill="#E85D04">User</text>
+        <text x="80" y="232" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#666">Entrepreneur / Business Owner</text>
+
+        <!-- ACTOR: Groq AI (right) -->
+        <circle cx="980" cy="100" r="18" fill="none" stroke="#FF8C42" stroke-width="1.5"/>
+        <line x1="980" y1="118" x2="980" y2="165" stroke="#FF8C42" stroke-width="1.5"/>
+        <line x1="950" y1="135" x2="1010" y2="135" stroke="#FF8C42" stroke-width="1.5"/>
+        <line x1="980" y1="165" x2="955" y2="200" stroke="#FF8C42" stroke-width="1.5"/>
+        <line x1="980" y1="165" x2="1005" y2="200" stroke="#FF8C42" stroke-width="1.5"/>
+        <text x="980" y="218" text-anchor="middle" font-family="DM Sans" font-size="12" font-weight="700" fill="#FF8C42">Groq AI</text>
+        <text x="980" y="232" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#666">LLaMA-3.3-70b-versatile</text>
+
+        <!-- P1 USE CASES -->
+        <text x="320" y="68" text-anchor="middle" font-family="DM Sans" font-size="9" font-weight="700" fill="#444" letter-spacing="0.12em">P1 · CORE</text>
+        <ellipse cx="320" cy="110" rx="88" ry="22" fill="rgba(232,93,4,0.07)" stroke="rgba(232,93,4,0.3)" stroke-width="1"/>
+        <text x="320" y="114" text-anchor="middle" font-family="DM Sans" font-size="11" font-weight="600" fill="#F0F0F0">Register / Login</text>
+
+        <ellipse cx="320" cy="175" rx="88" ry="22" fill="rgba(232,93,4,0.07)" stroke="rgba(232,93,4,0.3)" stroke-width="1"/>
+        <text x="320" y="179" text-anchor="middle" font-family="DM Sans" font-size="11" font-weight="600" fill="#F0F0F0">Take Assessment</text>
+
+        <ellipse cx="320" cy="240" rx="88" ry="22" fill="rgba(232,93,4,0.07)" stroke="rgba(232,93,4,0.3)" stroke-width="1"/>
+        <text x="320" y="244" text-anchor="middle" font-family="DM Sans" font-size="11" font-weight="600" fill="#F0F0F0">View Roadmap</text>
+
+        <ellipse cx="320" cy="305" rx="88" ry="22" fill="rgba(232,93,4,0.07)" stroke="rgba(232,93,4,0.3)" stroke-width="1"/>
+        <text x="320" y="309" text-anchor="middle" font-family="DM Sans" font-size="11" font-weight="600" fill="#F0F0F0">View Recommendations</text>
+
+        <ellipse cx="320" cy="370" rx="88" ry="22" fill="rgba(232,93,4,0.07)" stroke="rgba(232,93,4,0.3)" stroke-width="1"/>
+        <text x="320" y="374" text-anchor="middle" font-family="DM Sans" font-size="11" font-weight="600" fill="#F0F0F0">Explore Industries</text>
+
+        <ellipse cx="320" cy="435" rx="88" ry="22" fill="rgba(232,93,4,0.07)" stroke="rgba(232,93,4,0.3)" stroke-width="1"/>
+        <text x="320" y="439" text-anchor="middle" font-family="DM Sans" font-size="11" font-weight="600" fill="#F0F0F0">View Dashboard</text>
+
+        <!-- P2 USE CASES -->
+        <text x="530" y="68" text-anchor="middle" font-family="DM Sans" font-size="9" font-weight="700" fill="#444" letter-spacing="0.12em">P2 · INTELLIGENCE</text>
+        <ellipse cx="530" cy="110" rx="88" ry="22" fill="#111" stroke="#222" stroke-width="1"/>
+        <text x="530" y="114" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#777">AI Business Advisor</text>
+
+        <ellipse cx="530" cy="175" rx="88" ry="22" fill="#111" stroke="#222" stroke-width="1"/>
+        <text x="530" y="179" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#777">Market Intelligence</text>
+
+        <ellipse cx="530" cy="240" rx="88" ry="22" fill="#111" stroke="#222" stroke-width="1"/>
+        <text x="530" y="244" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#777">Risk Radar</text>
+
+        <ellipse cx="530" cy="305" rx="88" ry="22" fill="#111" stroke="#222" stroke-width="1"/>
+        <text x="530" y="309" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#777">Competitor Comparison</text>
+
+        <!-- P3 USE CASES -->
+        <text x="740" y="68" text-anchor="middle" font-family="DM Sans" font-size="9" font-weight="700" fill="#444" letter-spacing="0.12em">P3 · COMMUNITY</text>
+        <ellipse cx="740" cy="110" rx="88" ry="22" fill="#111" stroke="#222" stroke-width="1"/>
+        <text x="740" y="114" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#666">Success Library</text>
+
+        <ellipse cx="740" cy="175" rx="88" ry="22" fill="#111" stroke="#222" stroke-width="1"/>
+        <text x="740" y="179" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#666">Vendor Matching</text>
+
+        <ellipse cx="740" cy="240" rx="88" ry="22" fill="#111" stroke="#222" stroke-width="1"/>
+        <text x="740" y="244" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#666">Peer Benchmarking</text>
+
+        <!-- P4 USE CASES -->
+        <text x="740" y="340" text-anchor="middle" font-family="DM Sans" font-size="9" font-weight="700" fill="#444" letter-spacing="0.12em">P4 · ENTERPRISE</text>
+        <ellipse cx="740" cy="375" rx="88" ry="22" fill="#111" stroke="#222" stroke-width="1"/>
+        <text x="740" y="379" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#666">Team Assessment</text>
+
+        <ellipse cx="740" cy="435" rx="88" ry="22" fill="#111" stroke="#222" stroke-width="1"/>
+        <text x="740" y="439" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#666">Financial Planning</text>
+
+        <!-- User → P1 arrows -->
+        <line x1="140" y1="130" x2="232" y2="113" stroke="#E85D04" stroke-width="1" marker-end="url(#arr-org)"/>
+        <line x1="140" y1="145" x2="232" y2="175" stroke="#E85D04" stroke-width="1" marker-end="url(#arr-org)"/>
+        <line x1="140" y1="155" x2="232" y2="235" stroke="#E85D04" stroke-width="1" marker-end="url(#arr-org)"/>
+        <line x1="140" y1="160" x2="232" y2="298" stroke="#E85D04" stroke-width="1" marker-end="url(#arr-org)"/>
+        <line x1="140" y1="165" x2="232" y2="362" stroke="#E85D04" stroke-width="1" marker-end="url(#arr-org)"/>
+        <line x1="140" y1="170" x2="232" y2="428" stroke="#E85D04" stroke-width="1" marker-end="url(#arr-org)"/>
+
+        <!-- User → P2 arrows (dashed = future) -->
+        <line x1="140" y1="145" x2="442" y2="113" stroke="#333" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#arr-dash)"/>
+        <line x1="140" y1="150" x2="442" y2="175" stroke="#333" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#arr-dash)"/>
+        <line x1="140" y1="155" x2="442" y2="240" stroke="#333" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#arr-dash)"/>
+        <line x1="140" y1="160" x2="442" y2="305" stroke="#333" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#arr-dash)"/>
+
+        <!-- Groq AI → P1 AI use cases -->
+        <line x1="892" y1="130" x2="408" y2="178" stroke="#FF8C42" stroke-width="1" marker-end="url(#arr-org)"/>
+        <line x1="892" y1="135" x2="408" y2="243" stroke="#FF8C42" stroke-width="1" marker-end="url(#arr-org)"/>
+        <line x1="892" y1="140" x2="408" y2="308" stroke="#FF8C42" stroke-width="1" marker-end="url(#arr-org)"/>
+        <line x1="892" y1="145" x2="618" y2="113" stroke="#FF8C42" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arr-org)"/>
+        <line x1="892" y1="150" x2="618" y2="178" stroke="#FF8C42" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arr-org)"/>
+
+        <!-- Legend -->
+        <rect x="220" y="520" width="600" height="60" rx="3" fill="#0C0C0C" stroke="#1A1A1A" stroke-width="1"/>
+        <line x1="240" y1="545" x2="270" y2="545" stroke="#E85D04" stroke-width="1.5"/>
+        <text x="278" y="549" font-family="DM Sans" font-size="10" fill="#888">Active P1 use case</text>
+        <line x1="390" y1="545" x2="420" y2="545" stroke="#333" stroke-width="1" stroke-dasharray="5 4"/>
+        <text x="428" y="549" font-family="DM Sans" font-size="10" fill="#888">Future module (P2–P4)</text>
+        <line x1="240" y1="568" x2="270" y2="568" stroke="#FF8C42" stroke-width="1.5"/>
+        <text x="278" y="572" font-family="DM Sans" font-size="10" fill="#888">Groq AI generates content</text>
+        <ellipse cx="430" cy="568" rx="22" ry="9" fill="rgba(232,93,4,0.07)" stroke="rgba(232,93,4,0.3)" stroke-width="1"/>
+        <text x="430" y="572" text-anchor="middle" font-family="DM Sans" font-size="8" fill="#AAA">Active</text>
+        <ellipse cx="510" cy="568" rx="22" ry="9" fill="#111" stroke="#222" stroke-width="1"/>
+        <text x="510" y="572" text-anchor="middle" font-family="DM Sans" font-size="8" fill="#555">Future</text>
+
+      </svg>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- DIAGRAM 2 — CLASS DIAGRAM                                  -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="diagram-section">
+    <div class="diagram-label">Diagram 02</div>
+    <div class="diagram-title">Class Diagram</div>
+    <div class="diagram-desc">Shows all Django model classes, their attributes, data types and the relationships between them — associations, compositions and dependencies.</div>
+    <div class="diagram-box">
+      <svg viewBox="0 0 1060 700" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid2" width="52" height="52" patternUnits="userSpaceOnUse">
+            <path d="M52 0H0V52" fill="none" stroke="rgba(232,93,4,0.04)" stroke-width="1"/>
+          </pattern>
+          <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#2A2A2A"/>
+          </marker>
+          <marker id="arr2-org" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L9,3 z" fill="#E85D04"/>
+          </marker>
+          <marker id="diamond" markerWidth="12" markerHeight="12" refX="1" refY="6" orient="auto">
+            <path d="M1,6 L6,2 L11,6 L6,10 z" fill="none" stroke="#E85D04" stroke-width="1.2"/>
+          </marker>
+        </defs>
+        <rect width="1060" height="700" fill="url(#grid2)"/>
+
+        <!-- ── CLASS: User ── -->
+        <rect x="30" y="60" width="200" height="180" rx="3" fill="#0F0F0F" stroke="#E85D04" stroke-width="1.5"/>
+        <rect x="30" y="60" width="200" height="32" rx="3" fill="rgba(232,93,4,0.12)"/>
+        <rect x="30" y="88" width="200" height="2" fill="#E85D04" opacity="0.3"/>
+        <text x="130" y="81" text-anchor="middle" font-family="Bebas Neue" font-size="14" fill="#E85D04" letter-spacing="0.08em">User</text>
+        <text x="42" y="112" font-family="DM Mono" font-size="10" fill="#888">id : AutoField (PK)</text>
+        <text x="42" y="128" font-family="DM Mono" font-size="10" fill="#AAA">name : CharField</text>
+        <text x="42" y="144" font-family="DM Mono" font-size="10" fill="#AAA">email : EmailField</text>
+        <text x="42" y="160" font-family="DM Mono" font-size="10" fill="#AAA">password : CharField</text>
+        <text x="42" y="176" font-family="DM Mono" font-size="10" fill="#555">created_at : DateTime</text>
+        <rect x="30" y="188" width="200" height="1" fill="#1A1A1A"/>
+        <text x="42" y="205" font-family="DM Sans" font-size="10" fill="#666">+ login()</text>
+        <text x="42" y="220" font-family="DM Sans" font-size="10" fill="#666">+ signup()</text>
+        <text x="42" y="235" font-family="DM Sans" font-size="10" fill="#666">+ get_dashboard()</text>
+
+        <!-- ── CLASS: Assessment ── -->
+        <rect x="310" y="40" width="220" height="280" rx="3" fill="#0F0F0F" stroke="#E85D04" stroke-width="1.5"/>
+        <rect x="310" y="40" width="220" height="32" rx="3" fill="rgba(232,93,4,0.12)"/>
+        <rect x="310" y="68" width="220" height="2" fill="#E85D04" opacity="0.3"/>
+        <text x="420" y="61" text-anchor="middle" font-family="Bebas Neue" font-size="14" fill="#E85D04" letter-spacing="0.08em">Assessment</text>
+        <text x="322" y="90" font-family="DM Mono" font-size="10" fill="#888">id : AutoField (PK)</text>
+        <text x="322" y="106" font-family="DM Mono" font-size="10" fill="#888">user_id : FK → User</text>
+        <text x="322" y="122" font-family="DM Mono" font-size="10" fill="#AAA">domain : CharField</text>
+        <text x="322" y="138" font-family="DM Mono" font-size="10" fill="#AAA">capital : IntegerField</text>
+        <text x="322" y="154" font-family="DM Mono" font-size="10" fill="#AAA">revenue : IntegerField</text>
+        <text x="322" y="170" font-family="DM Mono" font-size="10" fill="#AAA">clients : IntegerField</text>
+        <text x="322" y="186" font-family="DM Mono" font-size="10" fill="#AAA">years_experience : Int</text>
+        <text x="322" y="202" font-family="DM Mono" font-size="10" fill="#AAA">team_size : CharField</text>
+        <text x="322" y="218" font-family="DM Mono" font-size="10" fill="#AAA">skills : TextField</text>
+        <text x="322" y="234" font-family="DM Mono" font-size="10" fill="#AAA">tier : CharField</text>
+        <text x="322" y="250" font-family="DM Mono" font-size="10" fill="#555">capability_score : Int</text>
+        <text x="322" y="266" font-family="DM Mono" font-size="10" fill="#555">business_level : Char</text>
+        <rect x="310" y="276" width="220" height="1" fill="#1A1A1A"/>
+        <text x="322" y="295" font-family="DM Sans" font-size="10" fill="#666">+ compute_score()</text>
+        <text x="322" y="310" font-family="DM Sans" font-size="10" fill="#666">+ classify_level()</text>
+
+        <!-- ── CLASS: AICache (abstract) ── -->
+        <rect x="600" y="40" width="210" height="160" rx="3" fill="#0C0C0C" stroke="#333" stroke-width="1" stroke-dasharray="5 4"/>
+        <rect x="600" y="40" width="210" height="32" rx="3" fill="#141414"/>
+        <text x="705" y="61" text-anchor="middle" font-family="Bebas Neue" font-size="13" fill="#555" letter-spacing="0.08em">«abstract» AICache</text>
+        <text x="612" y="90" font-family="DM Mono" font-size="10" fill="#555">assessment_id : FK</text>
+        <text x="612" y="106" font-family="DM Mono" font-size="10" fill="#555">content : TextField</text>
+        <text x="612" y="122" font-family="DM Mono" font-size="10" fill="#555">generated_at : DateTime</text>
+        <text x="612" y="138" font-family="DM Mono" font-size="10" fill="#555">is_cached : BooleanField</text>
+        <rect x="600" y="148" width="210" height="1" fill="#1A1A1A"/>
+        <text x="612" y="166" font-family="DM Sans" font-size="10" fill="#444">+ generate_async()</text>
+        <text x="612" y="181" font-family="DM Sans" font-size="10" fill="#444">+ get_or_generate()</text>
+
+        <!-- ── CLASS: Recommendations ── -->
+        <rect x="600" y="240" width="210" height="130" rx="3" fill="#0F0F0F" stroke="#1E1E1E" stroke-width="1"/>
+        <rect x="600" y="240" width="210" height="28" rx="3" fill="#141414"/>
+        <text x="705" y="258" text-anchor="middle" font-family="Bebas Neue" font-size="13" fill="#AAA" letter-spacing="0.06em">Recommendations</text>
+        <text x="612" y="284" font-family="DM Mono" font-size="10" fill="#888">«extends AICache»</text>
+        <text x="612" y="300" font-family="DM Mono" font-size="10" fill="#666">ai_recommendations</text>
+        <text x="612" y="316" font-family="DM Mono" font-size="10" fill="#666">  : TextField (JSON)</text>
+        <text x="612" y="340" font-family="DM Sans" font-size="10" fill="#444">+ get_recommendations()</text>
+        <text x="612" y="356" font-family="DM Sans" font-size="10" fill="#444">+ parse_priority()</text>
+
+        <!-- ── CLASS: Roadmap ── -->
+        <rect x="830" y="240" width="210" height="130" rx="3" fill="#0F0F0F" stroke="#1E1E1E" stroke-width="1"/>
+        <rect x="830" y="240" width="210" height="28" rx="3" fill="#141414"/>
+        <text x="935" y="258" text-anchor="middle" font-family="Bebas Neue" font-size="13" fill="#AAA" letter-spacing="0.06em">Roadmap</text>
+        <text x="842" y="284" font-family="DM Mono" font-size="10" fill="#888">«extends AICache»</text>
+        <text x="842" y="300" font-family="DM Mono" font-size="10" fill="#666">ai_roadmap : TextField</text>
+        <text x="842" y="316" font-family="DM Mono" font-size="10" fill="#666">  (JSON)</text>
+        <text x="842" y="340" font-family="DM Sans" font-size="10" fill="#444">+ generate_roadmap()</text>
+        <text x="842" y="356" font-family="DM Sans" font-size="10" fill="#444">+ get_week_tasks()</text>
+
+        <!-- ── CLASS: Industry ── -->
+        <rect x="30" y="320" width="210" height="180" rx="3" fill="#0F0F0F" stroke="#1E1E1E" stroke-width="1"/>
+        <rect x="30" y="320" width="210" height="28" rx="3" fill="#141414"/>
+        <text x="135" y="338" text-anchor="middle" font-family="Bebas Neue" font-size="13" fill="#AAA" letter-spacing="0.06em">Industry</text>
+        <text x="42" y="362" font-family="DM Mono" font-size="10" fill="#888">id : AutoField (PK)</text>
+        <text x="42" y="378" font-family="DM Mono" font-size="10" fill="#666">slug : SlugField</text>
+        <text x="42" y="394" font-family="DM Mono" font-size="10" fill="#666">name : CharField</text>
+        <text x="42" y="410" font-family="DM Mono" font-size="10" fill="#666">emoji : CharField</text>
+        <text x="42" y="426" font-family="DM Mono" font-size="10" fill="#666">description : TextField</text>
+        <text x="42" y="442" font-family="DM Mono" font-size="10" fill="#666">color : CharField</text>
+        <rect x="30" y="452" width="210" height="1" fill="#1A1A1A"/>
+        <text x="42" y="470" font-family="DM Sans" font-size="10" fill="#444">+ get_market_data()</text>
+        <text x="42" y="486" font-family="DM Sans" font-size="10" fill="#444">+ enrich_background()</text>
+
+        <!-- ── CLASS: UserIndustry ── -->
+        <rect x="310" y="400" width="220" height="160" rx="3" fill="#0F0F0F" stroke="#1E1E1E" stroke-width="1"/>
+        <rect x="310" y="400" width="220" height="28" rx="3" fill="#141414"/>
+        <text x="420" y="418" text-anchor="middle" font-family="Bebas Neue" font-size="13" fill="#AAA" letter-spacing="0.06em">UserIndustry</text>
+        <text x="322" y="442" font-family="DM Mono" font-size="10" fill="#888">id : AutoField (PK)</text>
+        <text x="322" y="458" font-family="DM Mono" font-size="10" fill="#888">user_id : FK → User</text>
+        <text x="322" y="474" font-family="DM Mono" font-size="10" fill="#888">assessment_id : FK</text>
+        <text x="322" y="490" font-family="DM Mono" font-size="10" fill="#666">industries : TextField</text>
+        <text x="322" y="506" font-family="DM Mono" font-size="10" fill="#666">  (JSON array)</text>
+        <text x="322" y="522" font-family="DM Mono" font-size="10" fill="#555">generated_at : DateTime</text>
+        <rect x="310" y="532" width="220" height="1" fill="#1A1A1A"/>
+        <text x="322" y="548" font-family="DM Sans" font-size="10" fill="#444">+ personalize()</text>
+
+        <!-- ── CLASS: IndustryDetailCache ── -->
+        <rect x="600" y="420" width="210" height="150" rx="3" fill="#0F0F0F" stroke="#1E1E1E" stroke-width="1"/>
+        <rect x="600" y="420" width="210" height="28" rx="3" fill="#141414"/>
+        <text x="705" y="438" text-anchor="middle" font-family="Bebas Neue" font-size="12" fill="#AAA" letter-spacing="0.04em">IndustryDetailCache</text>
+        <text x="612" y="462" font-family="DM Mono" font-size="10" fill="#888">user_id : FK → User</text>
+        <text x="612" y="478" font-family="DM Mono" font-size="10" fill="#888">slug : SlugField</text>
+        <text x="612" y="494" font-family="DM Mono" font-size="10" fill="#666">detail_data : TextField</text>
+        <text x="612" y="510" font-family="DM Mono" font-size="10" fill="#555">created_at : DateTime</text>
+        <rect x="600" y="520" width="210" height="1" fill="#1A1A1A"/>
+        <text x="612" y="538" font-family="DM Sans" font-size="10" fill="#444">+ get_or_generate()</text>
+        <text x="612" y="554" font-family="DM Sans" font-size="10" fill="#444">+ refresh()</text>
+
+        <!-- RELATIONSHIPS -->
+        <!-- User 1→* Assessment -->
+        <line x1="230" y1="150" x2="310" y2="150" stroke="#E85D04" stroke-width="1.5" marker-end="url(#arr2-org)"/>
+        <text x="248" y="143" font-family="DM Mono" font-size="9" fill="#E85D04">1</text>
+        <text x="290" y="143" font-family="DM Mono" font-size="9" fill="#E85D04">*</text>
+
+        <!-- Assessment 1→* UserIndustry -->
+        <line x1="420" y1="320" x2="420" y2="400" stroke="#2A2A2A" stroke-width="1" marker-end="url(#arr2)"/>
+        <text x="425" y="365" font-family="DM Mono" font-size="9" fill="#555">1..*</text>
+
+        <!-- Assessment → AICache (dashed dependency) -->
+        <line x1="530" y1="160" x2="600" y2="120" stroke="#333" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#arr2)"/>
+
+        <!-- AICache → Recs (inheritance) -->
+        <line x1="705" y1="200" x2="705" y2="240" stroke="#333" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <polygon points="705,200 698,214 712,214" fill="none" stroke="#444" stroke-width="1.2"/>
+
+        <!-- AICache → Roadmap (inheritance) -->
+        <line x1="810" y1="160" x2="935" y2="240" stroke="#333" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <polygon points="810,160 803,174 817,174" fill="none" stroke="#444" stroke-width="1.2"/>
+
+        <!-- User → UserIndustry -->
+        <line x1="130" y1="240" x2="130" y2="380" stroke="#2A2A2A" stroke-width="1"/>
+        <line x1="130" y1="380" x2="310" y2="460" stroke="#2A2A2A" stroke-width="1" marker-end="url(#arr2)"/>
+
+        <!-- Industry → IndustryDetailCache -->
+        <line x1="240" y1="420" x2="600" y2="480" stroke="#2A2A2A" stroke-width="1" marker-end="url(#arr2)"/>
+
+        <!-- Multiplicity labels -->
+        <text x="155" y="373" font-family="DM Mono" font-size="9" fill="#444">1</text>
+        <text x="310" y="455" font-family="DM Mono" font-size="9" fill="#444">*</text>
+
+        <!-- Legend -->
+        <rect x="30" y="610" width="500" height="60" rx="3" fill="#0C0C0C" stroke="#1A1A1A" stroke-width="1"/>
+        <line x1="50" y1="635" x2="90" y2="635" stroke="#E85D04" stroke-width="1.5" marker-end="url(#arr2-org)"/>
+        <text x="98" y="639" font-family="DM Sans" font-size="10" fill="#888">Association / Composition</text>
+        <line x1="50" y1="658" x2="90" y2="658" stroke="#333" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#arr2)"/>
+        <text x="98" y="662" font-family="DM Sans" font-size="10" fill="#888">Dependency / Inheritance</text>
+        <rect x="260" y="623" width="12" height="12" rx="1" fill="rgba(232,93,4,0.12)" stroke="rgba(232,93,4,0.3)" stroke-width="1"/>
+        <text x="278" y="633" font-family="DM Sans" font-size="10" fill="#888">Core model</text>
+        <rect x="260" y="648" width="12" height="12" rx="1" fill="#141414" stroke="#222" stroke-width="1"/>
+        <text x="278" y="658" font-family="DM Sans" font-size="10" fill="#888">Supporting model</text>
+
+      </svg>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- DIAGRAM 3 — SEQUENCE DIAGRAM                               -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="diagram-section">
+    <div class="diagram-label">Diagram 03</div>
+    <div class="diagram-title">Sequence Diagram</div>
+    <div class="diagram-desc">Step-by-step interaction between the User, React Frontend, Django Backend, MySQL Database and Groq AI during the core assessment submission and AI generation flow.</div>
+    <div class="diagram-box">
+      <svg viewBox="0 0 1060 680" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid3" width="52" height="52" patternUnits="userSpaceOnUse">
+            <path d="M52 0H0V52" fill="none" stroke="rgba(232,93,4,0.04)" stroke-width="1"/>
+          </pattern>
+          <marker id="sarr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#E85D04"/>
+          </marker>
+          <marker id="sarr-ret" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#555"/>
+          </marker>
+          <marker id="sarr-db" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#3B82F6"/>
+          </marker>
+          <marker id="sarr-ai" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#FF8C42"/>
+          </marker>
+        </defs>
+        <rect width="1060" height="680" fill="url(#grid3)"/>
+
+        <!-- LIFELINE HEADERS -->
+        <!-- User -->
+        <rect x="40" y="20" width="110" height="44" rx="3" fill="rgba(232,93,4,0.1)" stroke="rgba(232,93,4,0.35)" stroke-width="1.5"/>
+        <text x="95" y="37" text-anchor="middle" font-family="Bebas Neue" font-size="13" fill="#E85D04" letter-spacing="0.06em">User</text>
+        <text x="95" y="54" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#888">Browser</text>
+
+        <!-- React Frontend -->
+        <rect x="210" y="20" width="130" height="44" rx="3" fill="rgba(232,93,4,0.1)" stroke="rgba(232,93,4,0.35)" stroke-width="1.5"/>
+        <text x="275" y="37" text-anchor="middle" font-family="Bebas Neue" font-size="13" fill="#E85D04" letter-spacing="0.06em">React Frontend</text>
+        <text x="275" y="54" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#888">TypeScript + Hooks</text>
+
+        <!-- Django Backend -->
+        <rect x="420" y="20" width="130" height="44" rx="3" fill="rgba(232,93,4,0.1)" stroke="rgba(232,93,4,0.35)" stroke-width="1.5"/>
+        <text x="485" y="37" text-anchor="middle" font-family="Bebas Neue" font-size="13" fill="#E85D04" letter-spacing="0.06em">Django Backend</text>
+        <text x="485" y="54" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#888">REST API</text>
+
+        <!-- MySQL -->
+        <rect x="640" y="20" width="110" height="44" rx="3" fill="rgba(59,130,246,0.08)" stroke="rgba(59,130,246,0.3)" stroke-width="1.5"/>
+        <text x="695" y="37" text-anchor="middle" font-family="Bebas Neue" font-size="13" fill="#3B82F6" letter-spacing="0.06em">MySQL</text>
+        <text x="695" y="54" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#666">Database</text>
+
+        <!-- Groq AI -->
+        <rect x="830" y="20" width="130" height="44" rx="3" fill="rgba(255,140,66,0.08)" stroke="rgba(255,140,66,0.3)" stroke-width="1.5"/>
+        <text x="895" y="37" text-anchor="middle" font-family="Bebas Neue" font-size="13" fill="#FF8C42" letter-spacing="0.06em">Groq AI</text>
+        <text x="895" y="54" text-anchor="middle" font-family="DM Sans" font-size="9" fill="#888">LLaMA-3.3-70b</text>
+
+        <!-- LIFELINES (vertical dashed lines) -->
+        <line x1="95"  y1="64" x2="95"  y2="660" stroke="#1C1C1C" stroke-width="1" stroke-dasharray="4 4"/>
+        <line x1="275" y1="64" x2="275" y2="660" stroke="#1C1C1C" stroke-width="1" stroke-dasharray="4 4"/>
+        <line x1="485" y1="64" x2="485" y2="660" stroke="#1C1C1C" stroke-width="1" stroke-dasharray="4 4"/>
+        <line x1="695" y1="64" x2="695" y2="660" stroke="#1C1C1C" stroke-width="1" stroke-dasharray="4 4"/>
+        <line x1="895" y1="64" x2="895" y2="660" stroke="#1C1C1C" stroke-width="1" stroke-dasharray="4 4"/>
+
+        <!-- ACTIVATION BOXES -->
+        <rect x="88"  y="100" width="14" height="480" rx="1" fill="#1A1A1A" stroke="#222" stroke-width="1"/>
+        <rect x="268" y="110" width="14" height="460" rx="1" fill="#1A1A1A" stroke="#222" stroke-width="1"/>
+        <rect x="478" y="140" width="14" height="370" rx="1" fill="rgba(232,93,4,0.08)" stroke="rgba(232,93,4,0.2)" stroke-width="1"/>
+        <rect x="688" y="180" width="14" height="180" rx="1" fill="rgba(59,130,246,0.08)" stroke="rgba(59,130,246,0.15)" stroke-width="1"/>
+        <rect x="888" y="320" width="14" height="160" rx="1" fill="rgba(255,140,66,0.08)" stroke="rgba(255,140,66,0.2)" stroke-width="1"/>
+
+        <!-- MESSAGES -->
+        <!-- 1. User fills form -->
+        <line x1="102" y1="110" x2="268" y2="110" stroke="#E85D04" stroke-width="1.5" marker-end="url(#sarr)"/>
+        <text x="178" y="105" text-anchor="middle" font-family="DM Sans" font-size="11" font-weight="600" fill="#F0F0F0">1. Fill Assessment Form</text>
+        <text x="178" y="120" text-anchor="middle" font-family="DM Mono" font-size="9" fill="#666">domain, capital, revenue, skills, tier</text>
+
+        <!-- 2. Submit -->
+        <line x1="282" y1="148" x2="478" y2="148" stroke="#E85D04" stroke-width="1.5" marker-end="url(#sarr)"/>
+        <text x="380" y="143" text-anchor="middle" font-family="DM Sans" font-size="11" font-weight="600" fill="#F0F0F0">2. POST /assessment/submit/</text>
+        <text x="380" y="158" text-anchor="middle" font-family="DM Mono" font-size="9" fill="#666">credentials: include</text>
+
+        <!-- 3. Compute score -->
+        <line x1="485" y1="185" x2="530" y2="185" stroke="#E85D04" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="560" y="181" font-family="DM Sans" font-size="10" fill="#888">3. compute_capability_score()</text>
+        <line x1="530" y1="195" x2="485" y2="195" stroke="#555" stroke-width="1" stroke-dasharray="3 3" marker-end="url(#sarr-ret)"/>
+        <text x="560" y="205" font-family="DM Sans" font-size="10" fill="#555">→ score, level, confidence</text>
+
+        <!-- 4. Save to DB -->
+        <line x1="492" y1="222" x2="688" y2="222" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#sarr-db)"/>
+        <text x="590" y="217" text-anchor="middle" font-family="DM Sans" font-size="11" font-weight="600" fill="#3B82F6">4. INSERT assessments</text>
+        <text x="590" y="232" text-anchor="middle" font-family="DM Mono" font-size="9" fill="#555">save score + user_id</text>
+
+        <!-- DB returns ID -->
+        <line x1="688" y1="248" x2="492" y2="248" stroke="#555" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#sarr-ret)"/>
+        <text x="590" y="244" text-anchor="middle" font-family="DM Mono" font-size="9" fill="#444">assessment_id</text>
+
+        <!-- 5. Return result to frontend -->
+        <line x1="478" y1="275" x2="282" y2="275" stroke="#555" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#sarr-ret)"/>
+        <text x="380" y="270" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#AAA">5. 200 OK — level, score, confidence</text>
+
+        <!-- 6. Show done screen -->
+        <line x1="268" y1="300" x2="102" y2="300" stroke="#555" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#sarr-ret)"/>
+        <text x="178" y="295" text-anchor="middle" font-family="DM Sans" font-size="11" fill="#AAA">6. Render Done Screen</text>
+
+        <!-- BACKGROUND THREAD LABEL -->
+        <rect x="420" y="318" width="250" height="20" rx="2" fill="rgba(232,93,4,0.06)" stroke="rgba(232,93,4,0.2)" stroke-width="1"/>
+        <text x="545" y="332" text-anchor="middle" font-family="DM Sans" font-size="9" font-weight="700" fill="#E85D04" letter-spacing="0.1em">BACKGROUND THREAD (async)</text>
+
+        <!-- 7. Generate Recommendations -->
+        <line x1="492" y1="356" x2="888" y2="356" stroke="#FF8C42" stroke-width="1.5" marker-end="url(#sarr-ai)"/>
+        <text x="690" y="350" text-anchor="middle" font-family="DM Sans" font-size="11" font-weight="600" fill="#FF8C42">7. Generate Recommendations</text>
+        <text x="690" y="364" text-anchor="middle" font-family="DM Mono" font-size="9" fill="#888">prompt: domain + level + score</text>
+
+        <!-- Groq returns recs -->
+        <line x1="888" y1="390" x2="492" y2="390" stroke="#555" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#sarr-ret)"/>
+        <text x="690" y="385" text-anchor="middle" font-family="DM Mono" font-size="9" fill="#555">5 prioritised recommendations (JSON)</text>
+
+        <!-- Save recs to DB -->
+        <line x1="492" y1="408" x2="688" y2="408" stroke="#3B82F6" stroke-width="1" marker-end="url(#sarr-db)"/>
+        <text x="590" y="403" text-anchor="middle" font-family="DM Sans" font-size="10" fill="#3B82F6">UPDATE assessments.ai_recommendations</text>
+
+        <!-- 8. Generate Roadmap -->
+        <line x1="492" y1="434" x2="888" y2="434" stroke="#FF8C42" stroke-width="1.5" marker-end="url(#sarr-ai)"/>
+        <text x="690" y="428" text-anchor="middle" font-family="DM Sans" font-size="11" font-weight="600" fill="#FF8C42">8. Generate Roadmap</text>
+
+        <line x1="888" y1="458" x2="492" y2="458" stroke="#555" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#sarr-ret)"/>
+        <text x="690" y="453" text-anchor="middle" font-family="DM Mono" font-size="9" fill="#555">4-week plan (JSON)</text>
+
+        <line x1="492" y1="475" x2="688" y2="475" stroke="#3B82F6" stroke-width="1" marker-end="url(#sarr-db)"/>
+        <text x="590" y="470" text-anchor="middle" font-family="DM Sans" font-size="10" fill="#3B82F6">UPDATE assessments.ai_roadmap</text>
+
+        <!-- 9. Generate Industries -->
+        <line x1="492" y1="500" x2="888" y2="500" stroke="#FF8C42" stroke-width="1.5" marker-end="url(#sarr-ai)"/>
+        <text x="690" y="494" text-anchor="middle" font-family="DM Sans" font-size="11" font-weight="600" fill="#FF8C42">9. Generate Industry Matches</text>
+
+        <line x1="888" y1="524" x2="492" y2="524" stroke="#555" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#sarr-ret)"/>
+        <text x="690" y="519" text-anchor="middle" font-family="DM Mono" font-size="9" fill="#555">personalised industry list (JSON)</text>
+
+        <line x1="492" y1="542" x2="688" y2="542" stroke="#3B82F6" stroke-width="1" marker-end="url(#sarr-db)"/>
+        <text x="590" y="537" text-anchor="middle" font-family="DM Sans" font-size="10" fill="#3B82F6">INSERT user_industries</text>
+
+        <!-- 10. Frontend polls -->
+        <line x1="268" y1="572" x2="478" y2="572" stroke="#E85D04" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#sarr)"/>
+        <text x="380" y="567" text-anchor="middle" font-family="DM Sans" font-size="10" fill="#888">10. Poll GET /dashboard/data/ every 6s</text>
+
+        <line x1="478" y1="592" x2="268" y2="592" stroke="#555" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#sarr-ret)"/>
+        <text x="380" y="607" text-anchor="middle" font-family="DM Sans" font-size="10" fill="#555">Status: generating → cached → render</text>
+
+        <!-- Legend -->
+        <rect x="30" y="622" width="520" height="44" rx="3" fill="#0C0C0C" stroke="#1A1A1A" stroke-width="1"/>
+        <line x1="50" y1="640" x2="80" y2="640" stroke="#E85D04" stroke-width="1.5" marker-end="url(#sarr)"/>
+        <text x="88" y="644" font-family="DM Sans" font-size="10" fill="#888">Synchronous call</text>
+        <line x1="180" y1="640" x2="210" y2="640" stroke="#555" stroke-width="1" stroke-dasharray="5 4" marker-end="url(#sarr-ret)"/>
+        <text x="218" y="644" font-family="DM Sans" font-size="10" fill="#888">Return / Response</text>
+        <line x1="340" y1="640" x2="370" y2="640" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#sarr-db)"/>
+        <text x="378" y="644" font-family="DM Sans" font-size="10" fill="#888">DB operation</text>
+        <line x1="50" y1="658" x2="80" y2="658" stroke="#FF8C42" stroke-width="1.5" marker-end="url(#sarr-ai)"/>
+        <text x="88" y="662" font-family="DM Sans" font-size="10" fill="#888">Groq AI call (background)</text>
+
+      </svg>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- DIAGRAM 4 — ER DIAGRAM                                     -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div class="diagram-section">
+    <div class="diagram-label">Diagram 04</div>
+    <div class="diagram-title">ER Diagram</div>
+    <div class="diagram-desc">All MySQL database tables, their columns with data types and primary/foreign keys, and the relationships between entities with cardinality notation.</div>
+    <div class="diagram-box">
+      <svg viewBox="0 0 1060 720" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid4" width="52" height="52" patternUnits="userSpaceOnUse">
+            <path d="M52 0H0V52" fill="none" stroke="rgba(232,93,4,0.04)" stroke-width="1"/>
+          </pattern>
+          <marker id="earr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#2A2A2A"/>
+          </marker>
+          <marker id="earr-pk" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#E85D04"/>
+          </marker>
+        </defs>
+        <rect width="1060" height="720" fill="url(#grid4)"/>
+
+        <!-- Helper: table header macro -->
+        <!-- TABLE: users -->
+        <rect x="30" y="40" width="220" height="220" rx="3" fill="#0D0D0D" stroke="#E85D04" stroke-width="1.5"/>
+        <rect x="30" y="40" width="220" height="34" rx="3" fill="rgba(232,93,4,0.12)"/>
+        <rect x="30" y="74" width="220" height="1" fill="rgba(232,93,4,0.3)"/>
+        <text x="140" y="62" text-anchor="middle" font-family="Bebas Neue" font-size="15" fill="#E85D04" letter-spacing="0.1em">users</text>
+
+        <rect x="36" y="82" width="208" height="18" rx="2" fill="rgba(232,93,4,0.06)"/>
+        <text x="44" y="94" font-family="DM Mono" font-size="10" fill="#E85D04">🔑 id</text>
+        <text x="200" y="94" text-anchor="end" font-family="DM Mono" font-size="9" fill="#666">INT PK AI</text>
+
+        <text x="44" y="114" font-family="DM Mono" font-size="10" fill="#AAA">name</text>
+        <text x="200" y="114" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">VARCHAR(100)</text>
+        <text x="44" y="132" font-family="DM Mono" font-size="10" fill="#AAA">email</text>
+        <text x="200" y="132" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">VARCHAR UNIQUE</text>
+        <text x="44" y="150" font-family="DM Mono" font-size="10" fill="#AAA">password</text>
+        <text x="200" y="150" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">VARCHAR(64)</text>
+        <text x="44" y="168" font-family="DM Mono" font-size="10" fill="#666">created_at</text>
+        <text x="200" y="168" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">DATETIME</text>
+        <line x1="36" y1="176" x2="244" y2="176" stroke="#141414" stroke-width="1"/>
+        <text x="44" y="192" font-family="DM Sans" font-size="9" fill="#555" font-style="italic">Indexes: email (UNIQUE)</text>
+        <text x="44" y="208" font-family="DM Sans" font-size="9" fill="#555" font-style="italic">Auth: SHA-256 hashed pw</text>
+        <text x="44" y="224" font-family="DM Sans" font-size="9" fill="#555" font-style="italic">Session: Django sessions</text>
+        <text x="44" y="240" font-family="DM Sans" font-size="9" fill="#555" font-style="italic">Relations: 1→* assessments</text>
+
+        <!-- TABLE: assessments -->
+        <rect x="310" y="20" width="240" height="360" rx="3" fill="#0D0D0D" stroke="#E85D04" stroke-width="1.5"/>
+        <rect x="310" y="20" width="240" height="34" rx="3" fill="rgba(232,93,4,0.12)"/>
+        <rect x="310" y="54" width="240" height="1" fill="rgba(232,93,4,0.3)"/>
+        <text x="430" y="42" text-anchor="middle" font-family="Bebas Neue" font-size="15" fill="#E85D04" letter-spacing="0.1em">assessments</text>
+
+        <rect x="316" y="62" width="228" height="18" rx="2" fill="rgba(232,93,4,0.06)"/>
+        <text x="324" y="74" font-family="DM Mono" font-size="10" fill="#E85D04">🔑 id</text>
+        <text x="542" y="74" text-anchor="end" font-family="DM Mono" font-size="9" fill="#666">INT PK AI</text>
+
+        <text x="324" y="95" font-family="DM Mono" font-size="10" fill="#3B82F6">🔗 user_id</text>
+        <text x="542" y="95" text-anchor="end" font-family="DM Mono" font-size="9" fill="#3B82F6">FK → users.id</text>
+        <text x="324" y="112" font-family="DM Mono" font-size="10" fill="#AAA">domain</text>
+        <text x="542" y="112" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">VARCHAR(100)</text>
+        <text x="324" y="129" font-family="DM Mono" font-size="10" fill="#AAA">capital</text>
+        <text x="542" y="129" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">INT</text>
+        <text x="324" y="146" font-family="DM Mono" font-size="10" fill="#AAA">revenue</text>
+        <text x="542" y="146" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">INT</text>
+        <text x="324" y="163" font-family="DM Mono" font-size="10" fill="#AAA">clients</text>
+        <text x="542" y="163" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">INT</text>
+        <text x="324" y="180" font-family="DM Mono" font-size="10" fill="#AAA">years_experience</text>
+        <text x="542" y="180" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">INT</text>
+        <text x="324" y="197" font-family="DM Mono" font-size="10" fill="#AAA">team_size</text>
+        <text x="542" y="197" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">VARCHAR(10)</text>
+        <text x="324" y="214" font-family="DM Mono" font-size="10" fill="#AAA">skills</text>
+        <text x="542" y="214" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">TEXT (JSON)</text>
+        <text x="324" y="231" font-family="DM Mono" font-size="10" fill="#AAA">tier</text>
+        <text x="542" y="231" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">VARCHAR(10)</text>
+        <line x1="316" y1="240" x2="544" y2="240" stroke="#1C1C1C" stroke-width="1"/>
+        <text x="324" y="256" font-family="DM Mono" font-size="10" fill="#888">capability_score</text>
+        <text x="542" y="256" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">INT</text>
+        <text x="324" y="273" font-family="DM Mono" font-size="10" fill="#888">business_level</text>
+        <text x="542" y="273" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">VARCHAR(20)</text>
+        <text x="324" y="290" font-family="DM Mono" font-size="10" fill="#888">confidence</text>
+        <text x="542" y="290" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">FLOAT</text>
+        <line x1="316" y1="298" x2="544" y2="298" stroke="#1C1C1C" stroke-width="1"/>
+        <text x="324" y="314" font-family="DM Mono" font-size="10" fill="#666">ai_recommendations</text>
+        <text x="542" y="314" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">TEXT (JSON)</text>
+        <text x="324" y="331" font-family="DM Mono" font-size="10" fill="#666">ai_roadmap</text>
+        <text x="542" y="331" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">TEXT (JSON)</text>
+        <text x="324" y="348" font-family="DM Mono" font-size="10" fill="#555">created_at</text>
+        <text x="542" y="348" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">DATETIME</text>
+        <text x="324" y="368" font-family="DM Sans" font-size="9" fill="#444" font-style="italic">Index: user_id</text>
+
+        <!-- TABLE: industries -->
+        <rect x="30" y="300" width="220" height="220" rx="3" fill="#0D0D0D" stroke="#1C1C1C" stroke-width="1"/>
+        <rect x="30" y="300" width="220" height="34" rx="3" fill="#141414"/>
+        <rect x="30" y="334" width="220" height="1" fill="#222"/>
+        <text x="140" y="322" text-anchor="middle" font-family="Bebas Neue" font-size="15" fill="#AAA" letter-spacing="0.1em">industries</text>
+
+        <rect x="36" y="342" width="208" height="18" rx="2" fill="#161616"/>
+        <text x="44" y="354" font-family="DM Mono" font-size="10" fill="#888">🔑 id</text>
+        <text x="244" y="354" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">INT PK AI</text>
+
+        <text x="44" y="372" font-family="DM Mono" font-size="10" fill="#888">slug</text>
+        <text x="244" y="372" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">VARCHAR UNIQUE</text>
+        <text x="44" y="389" font-family="DM Mono" font-size="10" fill="#777">name</text>
+        <text x="244" y="389" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">VARCHAR(100)</text>
+        <text x="44" y="406" font-family="DM Mono" font-size="10" fill="#777">emoji</text>
+        <text x="244" y="406" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">VARCHAR(10)</text>
+        <text x="44" y="423" font-family="DM Mono" font-size="10" fill="#777">description</text>
+        <text x="244" y="423" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">TEXT</text>
+        <text x="44" y="440" font-family="DM Mono" font-size="10" fill="#777">color</text>
+        <text x="244" y="440" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">VARCHAR(10)</text>
+        <text x="44" y="457" font-family="DM Mono" font-size="10" fill="#666">tags</text>
+        <text x="244" y="457" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">TEXT (JSON)</text>
+        <text x="44" y="474" font-family="DM Mono" font-size="10" fill="#666">levels</text>
+        <text x="244" y="474" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">TEXT (JSON)</text>
+        <text x="44" y="495" font-family="DM Sans" font-size="9" fill="#444" font-style="italic">Index: slug (UNIQUE)</text>
+
+        <!-- TABLE: user_industries -->
+        <rect x="620" y="20" width="240" height="210" rx="3" fill="#0D0D0D" stroke="#1C1C1C" stroke-width="1"/>
+        <rect x="620" y="20" width="240" height="34" rx="3" fill="#141414"/>
+        <rect x="620" y="54" width="240" height="1" fill="#222"/>
+        <text x="740" y="42" text-anchor="middle" font-family="Bebas Neue" font-size="15" fill="#AAA" letter-spacing="0.1em">user_industries</text>
+
+        <rect x="626" y="62" width="228" height="18" rx="2" fill="#161616"/>
+        <text x="634" y="74" font-family="DM Mono" font-size="10" fill="#888">🔑 id</text>
+        <text x="854" y="74" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">INT PK AI</text>
+
+        <text x="634" y="92" font-family="DM Mono" font-size="10" fill="#3B82F6">🔗 user_id</text>
+        <text x="854" y="92" text-anchor="end" font-family="DM Mono" font-size="9" fill="#3B82F6">FK → users.id</text>
+        <text x="634" y="109" font-family="DM Mono" font-size="10" fill="#3B82F6">🔗 assessment_id</text>
+        <text x="854" y="109" text-anchor="end" font-family="DM Mono" font-size="9" fill="#3B82F6">FK → assessments</text>
+        <text x="634" y="126" font-family="DM Mono" font-size="10" fill="#777">industries</text>
+        <text x="854" y="126" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">TEXT (JSON)</text>
+        <text x="634" y="143" font-family="DM Mono" font-size="10" fill="#666">personalized</text>
+        <text x="854" y="143" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">BOOLEAN</text>
+        <text x="634" y="160" font-family="DM Mono" font-size="10" fill="#555">generated_at</text>
+        <text x="854" y="160" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">DATETIME</text>
+        <line x1="626" y1="170" x2="854" y2="170" stroke="#1C1C1C" stroke-width="1"/>
+        <text x="634" y="186" font-family="DM Sans" font-size="9" fill="#444" font-style="italic">Index: user_id, assessment_id</text>
+        <text x="634" y="200" font-family="DM Sans" font-size="9" fill="#444" font-style="italic">Groq-generated, cached per assessment</text>
+        <text x="634" y="214" font-family="DM Sans" font-size="9" fill="#444" font-style="italic">Replaced on refresh</text>
+
+        <!-- TABLE: industry_market_data -->
+        <rect x="620" y="260" width="240" height="180" rx="3" fill="#0D0D0D" stroke="#1C1C1C" stroke-width="1"/>
+        <rect x="620" y="260" width="240" height="34" rx="3" fill="#141414"/>
+        <rect x="620" y="294" width="240" height="1" fill="#222"/>
+        <text x="740" y="282" text-anchor="middle" font-family="Bebas Neue" font-size="13" fill="#AAA" letter-spacing="0.08em">industry_market_data</text>
+
+        <rect x="626" y="302" width="228" height="18" rx="2" fill="#161616"/>
+        <text x="634" y="314" font-family="DM Mono" font-size="10" fill="#888">🔑 id</text>
+        <text x="854" y="314" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">INT PK AI</text>
+
+        <text x="634" y="332" font-family="DM Mono" font-size="10" fill="#3B82F6">🔗 industry_slug</text>
+        <text x="854" y="332" text-anchor="end" font-family="DM Mono" font-size="9" fill="#3B82F6">FK → industries.slug</text>
+        <text x="634" y="349" font-family="DM Mono" font-size="10" fill="#777">market_size</text>
+        <text x="854" y="349" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">VARCHAR(50)</text>
+        <text x="634" y="366" font-family="DM Mono" font-size="10" fill="#777">growth</text>
+        <text x="854" y="366" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">VARCHAR(30)</text>
+        <text x="634" y="383" font-family="DM Mono" font-size="10" fill="#666">enriched_data</text>
+        <text x="854" y="383" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">TEXT (JSON)</text>
+        <text x="634" y="400" font-family="DM Mono" font-size="10" fill="#555">created_at</text>
+        <text x="854" y="400" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">DATETIME</text>
+        <text x="634" y="424" font-family="DM Sans" font-size="9" fill="#444" font-style="italic">Enriched by Groq in background</text>
+
+        <!-- TABLE: industry_detail_cache -->
+        <rect x="620" y="470" width="240" height="190" rx="3" fill="#0D0D0D" stroke="#1C1C1C" stroke-width="1"/>
+        <rect x="620" y="470" width="240" height="34" rx="3" fill="#141414"/>
+        <rect x="620" y="504" width="240" height="1" fill="#222"/>
+        <text x="740" y="492" text-anchor="middle" font-family="Bebas Neue" font-size="13" fill="#AAA" letter-spacing="0.06em">industry_detail_cache</text>
+
+        <rect x="626" y="512" width="228" height="18" rx="2" fill="#161616"/>
+        <text x="634" y="524" font-family="DM Mono" font-size="10" fill="#888">🔑 id</text>
+        <text x="854" y="524" text-anchor="end" font-family="DM Mono" font-size="9" fill="#555">INT PK AI</text>
+
+        <text x="634" y="542" font-family="DM Mono" font-size="10" fill="#3B82F6">🔗 user_id</text>
+        <text x="854" y="542" text-anchor="end" font-family="DM Mono" font-size="9" fill="#3B82F6">FK → users.id</text>
+        <text x="634" y="559" font-family="DM Mono" font-size="10" fill="#3B82F6">🔗 industry_slug</text>
+        <text x="854" y="559" text-anchor="end" font-family="DM Mono" font-size="9" fill="#3B82F6">FK → industries.slug</text>
+        <text x="634" y="576" font-family="DM Mono" font-size="10" fill="#777">detail_data</text>
+        <text x="854" y="576" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">TEXT (JSON)</text>
+        <text x="634" y="593" font-family="DM Mono" font-size="10" fill="#555">created_at</text>
+        <text x="854" y="593" text-anchor="end" font-family="DM Mono" font-size="9" fill="#444">DATETIME</text>
+        <line x1="626" y1="602" x2="854" y2="602" stroke="#1C1C1C" stroke-width="1"/>
+        <text x="634" y="618" font-family="DM Sans" font-size="9" fill="#444" font-style="italic">Unique per user + slug combination</text>
+        <text x="634" y="632" font-family="DM Sans" font-size="9" fill="#444" font-style="italic">Deep-dive generated by Groq on demand</text>
+        <text x="634" y="646" font-family="DM Sans" font-size="9" fill="#444" font-style="italic">Refreshable via endpoint</text>
+
+        <!-- RELATIONSHIPS / FOREIGN KEY LINES -->
+        <!-- users → assessments (1:N) -->
+        <line x1="250" y1="150" x2="310" y2="150" stroke="#E85D04" stroke-width="1.5" marker-end="url(#earr-pk)"/>
+        <text x="255" y="144" font-family="DM Mono" font-size="10" fill="#E85D04">1</text>
+        <text x="296" y="144" font-family="DM Mono" font-size="10" fill="#E85D04">N</text>
+
+        <!-- assessments → user_industries (1:N) -->
+        <line x1="550" y1="120" x2="620" y2="120" stroke="#2A2A2A" stroke-width="1" marker-end="url(#earr)"/>
+        <text x="556" y="114" font-family="DM Mono" font-size="10" fill="#444">1</text>
+        <text x="606" y="114" font-family="DM Mono" font-size="10" fill="#444">N</text>
+
+        <!-- users → user_industries (1:N) -->
+        <line x1="140" y1="260" x2="140" y2="600" stroke="#2A2A2A" stroke-width="1"/>
+        <line x1="140" y1="600" x2="620" y2="135" stroke="#2A2A2A" stroke-width="1" marker-end="url(#earr)"/>
+
+        <!-- industries → industry_market_data (1:1) -->
+        <line x1="250" y1="410" x2="620" y2="360" stroke="#2A2A2A" stroke-width="1" marker-end="url(#earr)"/>
+        <text x="320" y="395" font-family="DM Mono" font-size="9" fill="#444">1</text>
+        <text x="600" y="350" font-family="DM Mono" font-size="9" fill="#444">1</text>
+
+        <!-- industries → industry_detail_cache (1:N) -->
+        <line x1="250" y1="430" x2="620" y2="560" stroke="#2A2A2A" stroke-width="1" marker-end="url(#earr)"/>
+        <text x="380" y="510" font-family="DM Mono" font-size="9" fill="#444">1:N</text>
+
+        <!-- LEGEND -->
+        <rect x="30" y="648" width="560" height="52" rx="3" fill="#0C0C0C" stroke="#1A1A1A" stroke-width="1"/>
+        <rect x="46" y="660" width="10" height="10" rx="1" fill="rgba(232,93,4,0.12)" stroke="rgba(232,93,4,0.35)" stroke-width="1"/>
+        <text x="62" y="669" font-family="DM Sans" font-size="10" fill="#888">Core entity</text>
+        <rect x="46" y="680" width="10" height="10" rx="1" fill="#141414" stroke="#222" stroke-width="1"/>
+        <text x="62" y="689" font-family="DM Sans" font-size="10" fill="#888">Supporting entity</text>
+        <text x="150" y="669" font-family="DM Mono" font-size="10" fill="#E85D04">🔑</text>
+        <text x="165" y="669" font-family="DM Sans" font-size="10" fill="#888">Primary Key</text>
+        <text x="150" y="689" font-family="DM Mono" font-size="10" fill="#3B82F6">🔗</text>
+        <text x="165" y="689" font-family="DM Sans" font-size="10" fill="#888">Foreign Key</text>
+        <line x1="268" y1="665" x2="298" y2="665" stroke="#E85D04" stroke-width="1.5" marker-end="url(#earr-pk)"/>
+        <text x="306" y="669" font-family="DM Sans" font-size="10" fill="#888">1:N relationship</text>
+        <line x1="268" y1="685" x2="298" y2="685" stroke="#2A2A2A" stroke-width="1" marker-end="url(#earr)"/>
+        <text x="306" y="689" font-family="DM Sans" font-size="10" fill="#888">Supporting relationship</text>
+      </svg>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
