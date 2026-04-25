@@ -18,8 +18,8 @@ import MarketIntelligence from "./pages/MarketIntelligence";
 import RiskRadar from "./pages/RiskRadar";
 import CompetitorComparison from "./pages/CompetitorComparison";
 import SuccessLibrary from "./pages/SuccessLibrary";
-import VendorMatching from "./pages/VendorMatching";
-import PeerBenchmarking from "./pages/PeerBenchmarking";
+import VendorMatchmaking from "./pages/VendorMatchmaking";
+import PeerMatchmaking from "./pages/PeerMatchmaking";
 import FinancialPlanning from "./pages/FinancialPlanning";
 import TeamAssessment from "./pages/TeamAssessment";
 import NotFound from "./pages/NotFound";
@@ -54,8 +54,8 @@ const App = () => (
             <Route path="/risk" element={<RiskRadar />} />
             <Route path="/compare" element={<CompetitorComparison />} />
             <Route path="/success-library" element={<SuccessLibrary />} />
-            <Route path="/vendors" element={<VendorMatching />} />
-            <Route path="/benchmarking" element={<PeerBenchmarking />} />
+            <Route path="/vendors" element={<VendorMatchmaking />} />
+            <Route path="/benchmarking" element={<PeerMatchmaking />} />
             <Route path="/financial" element={<FinancialPlanning />} />
             <Route path="/team" element={<TeamAssessment />} />
           </Route>

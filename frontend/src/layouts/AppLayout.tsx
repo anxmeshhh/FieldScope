@@ -34,8 +34,8 @@ const navSections = [
     label: "Community",
     items: [
       { to: "/success-library", icon: BookOpen, label: "Success Library",   phase: 3 },
-      { to: "/vendors",         icon: Store,    label: "Vendor Matching",   phase: 3 },
-      { to: "/benchmarking",    icon: Users2,   label: "Peer Benchmarking", phase: 3 },
+      { to: "/vendors",         icon: Store,    label: "Vendor Matchmaking",phase: 3 },
+      { to: "/benchmarking",    icon: Users2,   label: "Peer Matchmaking",  phase: 3 },
     ],
   },
   {

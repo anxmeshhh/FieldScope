@@ -116,7 +116,9 @@ FieldScope enforces a strict **"White and Blue" Premium Aesthetic** (`#F8FAFC` b
 7. **Market Intelligence (`MarketIntelligence.tsx`)**: Real-time analytical dashboard generating live market demand trends, precise pricing benchmarks, and geographic heatmaps based on the user's assessment context.
 8. **Competitor Comparison (`CompetitorComparison.tsx`)**: An interactive simulation engine where users define a specific target competitor (Name and Scale) and adjust their own financial/operational metrics via UI sliders. The system instantly computes a customized, LLM-powered hypothetical gap analysis and radar chart. Users can then permanently save this specific competitor profile to the database for instant retrieval later.
 9. **Live Risk Radar (`RiskRadar.tsx`)**: An automated, dynamic risk detection system requiring the user to run 5 distinct business scale simulations. After running the 5th simulation, the system mathematically averages the risk scores and deduplicates all identified vulnerabilities. This creates a highly accurate, permanent "Master Risk Profile" that is saved to the database.
-
+10. **Success Library (`SuccessLibrary.tsx`)**: An immersive, Netflix-style grid of AI-generated case studies tailored specifically to the user's domain and business tier. Features data-dense fact cards (ROI, Time-to-Value) and an infinite "Load More" capability that permanently appends new unique strategies to the database cache.
+11. **Vendor Matchmaking (`VendorMatchmaking.tsx`)**: A targeted B2B sourcing engine that aligns hypothetical partners strictly with the user's available capital. Features a "Match Score" algorithm, precise cost estimations, and interactive split-screen map navigation.
+12. **Peer Matchmaking (`PeerMatchmaking.tsx`)**: A localized synergy networking hub discovering complementary businesses in the user's city tier, outputting cross-promotion strategies and quantifiable synergy scores.
 ---
 
 ## 7. Scalability & Future Scope (Senior Dev Perspective)

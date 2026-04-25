@@ -29,7 +29,12 @@ urlpatterns = [
 
     path("industries/",              views.get_industries),
     path("industries/personalized/", views.get_personalized_industries),
-    path("industries/refresh/",      views.refresh_personalized_industries),
+    path("industries/refresh/",      views.refresh_industry_data),
+    path("industries/refresh-personalized/", views.refresh_personalized_industries),
+
+    path("success-library/",         views.get_success_library),
+    path("vendor-matchmaking/",      views.get_vendor_matchmaking),
+    path("peer-matchmaking/",        views.get_peer_matchmaking),
 
     path("industries/<slug:slug>/",         views.get_industry_detail),
     path("industries/<slug:slug>/refresh/", views.refresh_industry_detail),

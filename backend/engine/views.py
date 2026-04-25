@@ -416,7 +416,7 @@ def parse_groq_json(raw):
         raw = raw.split("```")[1]
         if raw.startswith("json"):
             raw = raw[4:]
-    return json.loads(raw.strip())
+    return json.loads(raw.strip(), strict=False)
 
 
 # ─────────────────────────────────────────────
@@ -1921,3 +1921,219 @@ def save_risk_profile(request):
         return JsonResponse({"error": "DB error.", "detail": str(e)}, status=500)
         
     return JsonResponse({"success": True, "aggregated": aggregated})
+
+# ─────────────────────────────────────────────
+# SUCCESS LIBRARY
+# ─────────────────────────────────────────────
+
+@require_http_methods(["GET"])
+def get_success_library(request):
+    user_id = request.session.get("user_id")
+    if not user_id: return JsonResponse({"error": "Unauthorized."}, status=401)
+
+    hist_id = request.GET.get("id")
+    append_mode = request.GET.get("append") == "true"
+
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+        if hist_id:
+            cursor.execute("SELECT id, domain, business_level, tier, ai_success_library FROM assessments WHERE user_id = %s AND id = %s", (user_id, hist_id))
+        else:
+            cursor.execute("SELECT id, domain, business_level, tier, ai_success_library FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1", (user_id,))
+        a = cursor.fetchone()
+    except Exception as e:
+        return JsonResponse({"error": "DB error.", "detail": str(e)}, status=500)
+
+    if not a: return JsonResponse({"error": "No assessment found."}, status=404)
+
+    cached_library = []
+    if a.get("ai_success_library"):
+        cached = a["ai_success_library"]
+        if isinstance(cached, str): cached = json.loads(cached)
+        cached_library = cached
+        if not append_mode:
+            return JsonResponse({"library": cached_library, "cached": True})
+
+    existing_titles = [c.get("title") for c in cached_library] if cached_library else []
+    avoid_str = f"Do NOT duplicate these existing case studies: {', '.join(existing_titles)}" if existing_titles else ""
+
+    prompt = f"""
+You are an expert business analyst compiling real-world-style case studies for Indian businesses.
+Target Audience: {a['business_level']} '{a['domain']}' business in a {a['tier']} tier location.
+
+Generate exactly 4 NEW, highly realistic and inspiring case studies of similar businesses in India that scaled successfully.
+{avoid_str}
+
+Respond ONLY with a valid JSON array, strictly adhering to this schema without extra text or markdown fences:
+[
+  {{
+    "title": "Scaling [Area] for a [Domain] Firm",
+    "company": "Fictional Name (e.g. Metro Web Solutions)",
+    "roi": "Percentage (e.g., +315%)",
+    "time_to_value": "Timeframe (e.g., 4 months)",
+    "capital_required": "Rupees (e.g., ₹75,000)",
+    "challenge": "The main bottleneck they faced (1 sentence)",
+    "strategy": "The exact steps they took (1 sentence)"
+  }}
+]
+"""
+    try:
+        chat = get_groq_client().chat.completions.create(
+            model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}], temperature=0.7, max_tokens=1024
+        )
+        new_library = parse_groq_json(chat.choices[0].message.content)
+        
+        final_library = cached_library + new_library
+        
+        cursor.execute("UPDATE assessments SET ai_success_library = %s WHERE id = %s", (json.dumps(final_library), a["id"]))
+        conn.commit()
+    except Exception as e:
+        return JsonResponse({"error": "Groq error.", "detail": str(e)}, status=502)
+    finally:
+        cursor.close(); conn.close()
+
+    return JsonResponse({"library": final_library, "cached": False})
+
+# ─────────────────────────────────────────────
+# VENDOR MATCHMAKING
+# ─────────────────────────────────────────────
+
+@require_http_methods(["GET"])
+def get_vendor_matchmaking(request):
+    user_id = request.session.get("user_id")
+    if not user_id: return JsonResponse({"error": "Unauthorized."}, status=401)
+
+    hist_id = request.GET.get("id")
+    append_mode = request.GET.get("append") == "true"
+
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+        if hist_id:
+            cursor.execute("SELECT id, domain, business_level, tier, capital, ai_vendors FROM assessments WHERE user_id = %s AND id = %s", (user_id, hist_id))
+        else:
+            cursor.execute("SELECT id, domain, business_level, tier, capital, ai_vendors FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1", (user_id,))
+        a = cursor.fetchone()
+    except Exception as e:
+        return JsonResponse({"error": "DB error.", "detail": str(e)}, status=500)
+
+    if not a: return JsonResponse({"error": "No assessment found."}, status=404)
+
+    cached_vendors = []
+    if a.get("ai_vendors"):
+        cached = a["ai_vendors"]
+        if isinstance(cached, str): cached = json.loads(cached)
+        cached_vendors = cached
+        if not append_mode:
+            return JsonResponse({"vendors": cached_vendors, "cached": True})
+
+    existing_names = [v.get("name") for v in cached_vendors] if cached_vendors else []
+    avoid_str = f"Do NOT duplicate these existing vendors: {', '.join(existing_names)}" if existing_names else ""
+
+    prompt = f"""
+You are a B2B vendor matchmaking AI.
+User Profile: {a['business_level']} '{a['domain']}' agency in a {a['tier']} tier city with ₹{a['capital']} monthly capital.
+
+Generate exactly 5 NEW optimal B2B vendors this business should partner with to scale. 
+CRITICAL: The vendor's estimated cost MUST be realistic compared to the user's capital (₹{a['capital']}).
+{avoid_str}
+
+Respond ONLY with a valid JSON array, strictly adhering to this schema without extra text:
+[
+  {{
+    "name": "Vendor Name",
+    "type": "Vendor Type (e.g., Legal Counsel, Digital Marketing)",
+    "match_score": 98,
+    "estimated_cost": "Rupees (e.g., ₹20,000/mo)",
+    "time_to_integrate": "Timeframe (e.g., 2 weeks)",
+    "distance": "Distance (e.g., 5km Away, Remote)",
+    "probability": "Percentage (e.g., 85%)",
+    "benefit": "Why partner with them? (1 sentence)",
+    "action": "Next step to close the deal (1 sentence)"
+  }}
+]
+"""
+    try:
+        chat = get_groq_client().chat.completions.create(
+            model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}], temperature=0.7, max_tokens=1024
+        )
+        new_vendors = parse_groq_json(chat.choices[0].message.content)
+        final_vendors = cached_vendors + new_vendors
+        cursor.execute("UPDATE assessments SET ai_vendors = %s WHERE id = %s", (json.dumps(final_vendors), a["id"]))
+        conn.commit()
+    except Exception as e:
+        return JsonResponse({"error": "Groq error.", "detail": str(e)}, status=502)
+    finally:
+        cursor.close(); conn.close()
+
+    return JsonResponse({"vendors": final_vendors, "cached": False})
+
+# ─────────────────────────────────────────────
+# PEER MATCHMAKING
+# ─────────────────────────────────────────────
+
+@require_http_methods(["GET"])
+def get_peer_matchmaking(request):
+    user_id = request.session.get("user_id")
+    if not user_id: return JsonResponse({"error": "Unauthorized."}, status=401)
+
+    hist_id = request.GET.get("id")
+    append_mode = request.GET.get("append") == "true"
+
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+        if hist_id:
+            cursor.execute("SELECT id, domain, business_level, tier, team_size, ai_peers FROM assessments WHERE user_id = %s AND id = %s", (user_id, hist_id))
+        else:
+            cursor.execute("SELECT id, domain, business_level, tier, team_size, ai_peers FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1", (user_id,))
+        a = cursor.fetchone()
+    except Exception as e:
+        return JsonResponse({"error": "DB error.", "detail": str(e)}, status=500)
+
+    if not a: return JsonResponse({"error": "No assessment found."}, status=404)
+
+    cached_peers = []
+    if a.get("ai_peers"):
+        cached = a["ai_peers"]
+        if isinstance(cached, str): cached = json.loads(cached)
+        cached_peers = cached
+        if not append_mode:
+            return JsonResponse({"peers": cached_peers, "cached": True})
+
+    existing_names = [p.get("name") for p in cached_peers] if cached_peers else []
+    avoid_str = f"Do NOT duplicate these existing peers: {', '.join(existing_names)}" if existing_names else ""
+
+    prompt = f"""
+You are a peer networking AI for entrepreneurs.
+User Profile: {a['business_level']} '{a['domain']}' agency in a {a['tier']} tier city with {a['team_size']} employees.
+
+Generate exactly 4 NEW synergistic peer businesses in the same city that the user should network and co-market with.
+{avoid_str}
+
+Respond ONLY with a valid JSON array, strictly adhering to this schema without extra text:
+[
+  {{
+    "name": "Fictional Peer Company",
+    "domain": "Their Business Domain",
+    "synergy": "Percentage (e.g., 92%) representing Synergy Score",
+    "reason": "Why connect? (1 sentence)",
+    "strategy": "Exact co-marketing or referral strategy (1 sentence)"
+  }}
+]
+"""
+    try:
+        chat = get_groq_client().chat.completions.create(
+            model="llama-3.3-70b-versatile", messages=[{"role": "user", "content": prompt}], temperature=0.7, max_tokens=1024
+        )
+        new_peers = parse_groq_json(chat.choices[0].message.content)
+        final_peers = cached_peers + new_peers
+        cursor.execute("UPDATE assessments SET ai_peers = %s WHERE id = %s", (json.dumps(final_peers), a["id"]))
+        conn.commit()
+    except Exception as e:
+        return JsonResponse({"error": "Groq error.", "detail": str(e)}, status=502)
+    finally:
+        cursor.close(); conn.close()
+
+    return JsonResponse({"peers": final_peers, "cached": False})

@@ -3,10 +3,11 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   TrendingUp, Target, ArrowRight, Zap,
   CheckCircle, Map, Layers, ChevronRight,
-  Sparkles, Building2, Activity,
+  Sparkles, Building2, Activity, X, Eye, Shield, Scale, DollarSign, TrendingDown
 } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, XAxis, Tooltip,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis
 } from "recharts";
 
 const API = "http://localhost:8000";
@@ -603,6 +604,45 @@ const css = `
     cursor: pointer; transition: all 0.2s;
   }
 
+  /* ─── MODAL ─── */
+  .db-modal-overlay {
+    position: fixed; inset: 0; background: rgba(5,16,58,0.4);
+    backdrop-filter: blur(8px); z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px; animation: modal-fade 0.2s ease-out;
+  }
+
+  .db-modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; width: 100%; max-width: 700px; max-height: 90vh;
+    overflow-y: auto; box-shadow: 0 12px 48px rgba(5,16,58,0.15);
+    position: relative; animation: modal-slide 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+
+  .db-modal-head {
+    padding: 20px 24px; border-bottom: 1px solid var(--divider);
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(12px); z-index: 10;
+  }
+
+  .db-modal-title { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); display: flex; align-items: center; gap: 10px; }
+  .db-modal-close { background: transparent; border: none; color: var(--muted); cursor: pointer; transition: color 0.2s; display: flex; }
+  .db-modal-close:hover { color: var(--red); }
+  .db-modal-body { padding: 24px; }
+
+  @keyframes modal-fade { from{opacity:0} to{opacity:1} }
+  @keyframes modal-slide { from{opacity:0;transform:translateY(20px) scale(0.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+
+  .db-view-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; background: rgba(18,86,243,0.06);
+    color: var(--blue); font-size: 11px; font-weight: 700;
+    border: 1px solid rgba(18,86,243,0.15); border-radius: 6px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .db-view-btn:hover { background: var(--blue); color: #fff; }
+
   .db-qnav:last-child { margin-bottom: 0; }
 
   .db-qnav:hover {
@@ -897,7 +937,32 @@ export default function Dashboard() {
   const [history,       setHistory]       = useState<HistoryEntry[]>([]);
   const [recsStatus,    setRecsStatus]    = useState<"loading"|"cached"|"fresh"|"none">("loading");
   const [roadmapStatus, setRoadmapStatus] = useState<"loading"|"cached"|"fresh"|"none">("loading");
-  const [indStatus,     setIndStatus]     = useState<"loading"|"cached"|"fresh"|"generating"|"none">("loading");
+  const [indStatus, setIndStatus] = useState<"none"|"loading"|"generating"|"cached"|"fresh">("none");
+
+  // Modal State
+  const [activeModal, setActiveModal] = useState<"risk" | "competitor" | null>(null);
+  const [modalData, setModalData] = useState<any>(null);
+  const [modalLoading, setModalLoading] = useState(false);
+
+  const openModal = async (type: "risk" | "competitor", id: number) => {
+    setActiveModal(type);
+    setModalLoading(true);
+    setModalData(null);
+    try {
+      const endpoint = type === "risk" ? "risk-radar" : "simulate-competitor";
+      const res = await fetch(`${API}/${endpoint}/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, initial: true }),
+        credentials: "include"
+      });
+      const json = await res.json();
+      if (res.ok) setModalData(json);
+    } catch (e) {
+      console.error(e);
+    }
+    setModalLoading(false);
+  };
   const [loading,       setLoading]       = useState(true);
   const [barsVis,       setBarsVis]       = useState(false);
   const scoreRef = useRef<HTMLDivElement>(null);
@@ -1444,15 +1509,125 @@ export default function Dashboard() {
                       <td className="db-history-score">{h.capability_score}<span style={{ color:"var(--muted3)", fontSize: 10 }}>/100</span></td>
                       <td className="db-history-date">{h.confidence}%</td>
                       <td style={{ textAlign: "center" }}>
-                        {h.has_risk_profile ? <CheckCircle size={14} color="#10B981" style={{ display: "inline-block" }} /> : <span style={{ color: "var(--muted3)" }}>—</span>}
+                        {h.has_risk_profile ? (
+                          <button className="db-view-btn" onClick={(e) => { e.stopPropagation(); openModal("risk", h.id); }}>
+                            <Eye size={12} /> View
+                          </button>
+                        ) : <span style={{ color: "var(--muted3)" }}>—</span>}
                       </td>
                       <td style={{ textAlign: "center" }}>
-                        {h.has_competitor_profile ? <CheckCircle size={14} color="#10B981" style={{ display: "inline-block" }} /> : <span style={{ color: "var(--muted3)" }}>—</span>}
+                        {h.has_competitor_profile ? (
+                          <button className="db-view-btn" onClick={(e) => { e.stopPropagation(); openModal("competitor", h.id); }}>
+                            <Eye size={12} /> View
+                          </button>
+                        ) : <span style={{ color: "var(--muted3)" }}>—</span>}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL PORTAL */}
+        {activeModal && (
+          <div className="db-modal-overlay" onClick={() => setActiveModal(null)}>
+            <div className="db-modal" onClick={e => e.stopPropagation()}>
+              <div className="db-modal-head">
+                <div className="db-modal-title">
+                  {activeModal === "risk" ? <><Shield size={20} color="var(--red)" /> Master Risk Profile</> : <><Target size={20} color="var(--blue)" /> Target Competitor Profile</>}
+                </div>
+                <button className="db-modal-close" onClick={() => setActiveModal(null)}><X size={20} /></button>
+              </div>
+              <div className="db-modal-body">
+                {modalLoading ? (
+                  <div className="db-empty"><div className="db-spinner" /><div style={{marginTop: 10, color:"var(--muted)"}}>Loading cached data...</div></div>
+                ) : modalData ? (
+                  activeModal === "risk" ? (
+                    <div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
+                        {[
+                          { label: "High", val: modalData.summary?.highRisks, color: "var(--red)" },
+                          { label: "Med", val: modalData.summary?.mediumRisks, color: "var(--amber)" },
+                          { label: "Resolved", val: modalData.summary?.resolved, color: "var(--green)" },
+                          { label: "Score", val: modalData.summary?.score, color: "var(--blue)" },
+                        ].map(s => (
+                          <div key={s.label} style={{ background: "var(--surface2)", border: "1px solid var(--border)", padding: 12, borderRadius: 8, textAlign: "center" }}>
+                            <div style={{ fontSize: 24, fontWeight: 800, color: s.color }}>{s.val}</div>
+                            <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: "var(--muted2)" }}>{s.label}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        {modalData.categories?.map((cat: any, i: number) => {
+                          if (!cat.risks || cat.risks.length === 0) return null;
+                          const bg = cat.severity === "High" ? "rgba(224,62,62,0.1)" : cat.severity === "Medium" ? "rgba(232,150,10,0.1)" : "rgba(11,174,110,0.1)";
+                          const color = cat.severity === "High" ? "var(--red)" : cat.severity === "Medium" ? "var(--amber)" : "var(--green)";
+                          return (
+                            <div key={i} style={{ border: "1px solid var(--border)", borderRadius: 8, overflow: "hidden" }}>
+                              <div style={{ background: bg, padding: "10px 16px", fontWeight: 700, fontSize: 13, color: color, display: "flex", justifyContent: "space-between" }}>
+                                <span>{cat.category}</span>
+                                <span>{cat.severity}</span>
+                              </div>
+                              <div style={{ padding: 16 }}>
+                                {cat.risks.map((r: any, j: number) => (
+                                  <div key={j} style={{ marginBottom: j === cat.risks.length-1 ? 0 : 12, borderBottom: j === cat.risks.length-1 ? "none" : "1px solid var(--divider)", paddingBottom: j === cat.risks.length-1 ? 0 : 12 }}>
+                                    <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text)", marginBottom: 4 }}>{r.title}</div>
+                                    <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 8 }}>{r.desc}</div>
+                                    <div style={{ fontSize: 11, color: "var(--green)", fontWeight: 600, background: "rgba(11,174,110,0.1)", display: "inline-block", padding: "4px 8px", borderRadius: 4 }}>✓ {r.action}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 24, marginBottom: 24 }}>
+                        <div style={{ textAlign: "center" }}>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--muted2)", textTransform: "uppercase" }}>Target</div>
+                          <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>{modalData.comp_name || "Enterprise"}</div>
+                          <div className="db-pill" style={{ marginTop: 4 }}>{modalData.comp_scale || "Enterprise"} Scale</div>
+                        </div>
+                      </div>
+                      <div style={{ background: "var(--surface2)", borderRadius: 12, border: "1px solid var(--border)", padding: 16, marginBottom: 24 }}>
+                        <ResponsiveContainer width="100%" height={280}>
+                          <RadarChart data={modalData.dimensions}>
+                            <PolarGrid stroke="var(--border2)" />
+                            <PolarAngleAxis dataKey="axis" tick={{ fill: "var(--muted2)", fontSize: 11, fontWeight: 600 }} />
+                            <Tooltip contentStyle={{ borderRadius: 8, border: "1px solid var(--border)", fontSize: 12 }} />
+                            <Radar name="Simulated You" dataKey="you" stroke="var(--blue)" fill="var(--blue)" fillOpacity={0.15} strokeWidth={2} />
+                            <Radar name="Competitor" dataKey="competitor" stroke="var(--muted2)" fill="var(--muted2)" fillOpacity={0.05} strokeWidth={2} strokeDasharray="3 3" />
+                          </RadarChart>
+                        </ResponsiveContainer>
+                        <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 8 }}>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--blue)" }}>— You</div>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: "var(--muted2)" }}>- - Competitor</div>
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {modalData.gaps?.map((g: any, i: number) => (
+                          <div key={i} style={{ padding: 12, border: "1px solid var(--border)", borderRadius: 8, display: "flex", gap: 12, alignItems: "center" }}>
+                            <div style={{ width: 80, fontWeight: 700, fontSize: 12, color: "var(--text)" }}>{g.area}</div>
+                            <div style={{ flex: 1, fontSize: 11, color: "var(--muted)" }}>
+                              <div style={{ marginBottom: 4 }}><strong style={{color:"var(--blue)"}}>You:</strong> {g.you}</div>
+                              <div><strong style={{color:"var(--text)"}}>Them:</strong> {g.enterprise}</div>
+                            </div>
+                            <div style={{ width: 60, textAlign: "center" }}>
+                              <span className={`db-pill ${g.gap === "Critical" ? "amber" : "green"}`} style={{ background: g.gap === "Critical" ? "rgba(224,62,62,0.1)" : "", color: g.gap === "Critical" ? "var(--red)" : "", borderColor: g.gap === "Critical" ? "var(--red)" : "" }}>{g.gap}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                ) : (
+                  <div className="db-empty">Failed to load data.</div>
+                )}
+              </div>
             </div>
           </div>
         )}
