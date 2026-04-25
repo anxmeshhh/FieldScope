@@ -192,7 +192,7 @@ def _score_experience(years):
 
 def _score_skills(skills):
     if not skills: return 0.0
-    return round(min(sum(SKILL_WEIGHTS.get(s, 5) for s in skills) / 10, 10), 2)
+    return round(min(len(skills) * 3.5, 10.0), 2)
 
 
 def _score_location(tier):

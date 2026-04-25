@@ -22,15 +22,80 @@ const DOMAINS = [
   { val: "SaaS / Software",            emoji: "💻", hint: "B2B software & tools"           },
 ];
 
-const SKILLS = [
+const DOMAIN_SKILLS: Record<string, {val: string, emoji: string}[]> = {
+  "Digital Marketing": [
+    { val: "SEO/SEM",      emoji: "🔍" },
+    { val: "Paid Ads",     emoji: "📣" },
+    { val: "Content",      emoji: "✍️" },
+    { val: "Analytics",    emoji: "📊" },
+    { val: "Social Media", emoji: "📱" },
+    { val: "Automation",   emoji: "⚙️" },
+  ],
+  "Construction & Real Estate": [
+    { val: "Project Mgmt", emoji: "🏗️" },
+    { val: "B2B Sales",    emoji: "🤝" },
+    { val: "Procurement",  emoji: "📦" },
+    { val: "Compliance",   emoji: "📋" },
+    { val: "AutoCAD/BIM",  emoji: "📐" },
+    { val: "Finance",      emoji: "💰" },
+  ],
+  "D2C E-Commerce": [
+    { val: "Supply Chain", emoji: "📦" },
+    { val: "Performance Ads",emoji: "📈" },
+    { val: "Brand Design", emoji: "🎨" },
+    { val: "Shopify/Web",  emoji: "💻" },
+    { val: "Customer Success",emoji:"💬" },
+    { val: "Influencer",   emoji: "🤳" },
+  ],
+  "HealthTech": [
+    { val: "HIPAA/Compl.", emoji: "🛡️" },
+    { val: "EHR/EMR Integr.", emoji: "🏥" },
+    { val: "Med Device R&D", emoji: "🔬" },
+    { val: "B2B Healthcare", emoji: "🤝" },
+    { val: "Telemedicine", emoji: "📱" },
+    { val: "Data Security",emoji: "🔒" },
+  ],
+  "FinTech": [
+    { val: "Risk Modeling", emoji: "📊" },
+    { val: "Payment Gateways",emoji:"💳" },
+    { val: "Blockchain/Web3",emoji: "⛓️" },
+    { val: "Compliance/KYC",emoji: "📋" },
+    { val: "App Sec",       emoji: "🔒" },
+    { val: "Wealth Mgmt",   emoji: "💰" },
+  ],
+  "AgriTech": [
+    { val: "Supply Chain", emoji: "🚚" },
+    { val: "IoT / Sensors", emoji: "📡" },
+    { val: "Market Access", emoji: "🤝" },
+    { val: "Agronomy",      emoji: "🌱" },
+    { val: "Gov Grants",    emoji: "📜" },
+    { val: "Climate Data",  emoji: "🌦️" },
+  ],
+  "EdTech": [
+    { val: "Curriculum Des.",emoji:"📚" },
+    { val: "LMS Admin",    emoji: "💻" },
+    { val: "B2C Acquisition",emoji:"🎯" },
+    { val: "Student Success",emoji:"🎓" },
+    { val: "Video Prod.",  emoji: "🎬" },
+    { val: "Gamification", emoji: "🎮" },
+  ],
+  "SaaS / Software": [
+    { val: "Cloud Arch.",  emoji: "☁️" },
+    { val: "DevOps / CI-CD",emoji:"⚙️" },
+    { val: "Agile/Scrum",  emoji: "🔄" },
+    { val: "B2B Enterprise",emoji:"🏢" },
+    { val: "Product Mgmt", emoji: "📋" },
+    { val: "Data Science", emoji: "🧠" },
+  ]
+};
+
+const DEFAULT_SKILLS = [
   { val: "Analytics",  emoji: "📊" },
   { val: "Automation", emoji: "⚙️" },
-  { val: "SEO",        emoji: "🔍" },
-  { val: "Paid Ads",   emoji: "📣" },
   { val: "Sales",      emoji: "🤝" },
   { val: "Design",     emoji: "🎨" },
+  { val: "Marketing",  emoji: "📣" },
   { val: "Content",    emoji: "✍️" },
-  { val: "Video",      emoji: "🎬" },
 ];
 
 const TEAM_SIZES = [
@@ -41,9 +106,9 @@ const TEAM_SIZES = [
 ];
 
 const TIERS = [
-  { val: "metro", label: "Metro City",   sub: "Mumbai · Delhi · Bangalore · Chennai", pts: 5   },
-  { val: "tier2", label: "Tier-2 City",  sub: "Pune · Surat · Jaipur · Coimbatore",  pts: 3   },
-  { val: "rural", label: "Rural / Town", sub: "Sub-district & rural markets",         pts: 1.5 },
+  { val: "metro", label: "Metro City",   sub: "Mumbai · Delhi · Bangalore · Chennai", pts: 5,   emoji: "🏙️" },
+  { val: "tier2", label: "Tier-2 City",  sub: "Pune · Surat · Jaipur · Coimbatore",  pts: 3,   emoji: "🏢" },
+  { val: "rural", label: "Rural / Town", sub: "Sub-district & rural markets",         pts: 1.5, emoji: "🏡" },
 ];
 
 const STEPS = [
@@ -83,7 +148,7 @@ function previewScore(form: FormState) {
   const team   = teamMap[form.teamSize] ?? 0;
   const client = clients >= 50 ? 20 : clients >= 20 ? 15 : clients >= 5 ? 10 : clients >= 1 ? 5 : 0;
   const exp    = years >= 7 ? 15 : years >= 4 ? 11 : years >= 2 ? 7 : years >= 1 ? 3 : 0;
-  const skill  = Math.min(form.skills.reduce((s, sk) => s + (skillW[sk.toLowerCase()] ?? 5), 0) / 10, 10);
+  const skill  = Math.min(form.skills.length * 3.5, 10);
   const loc    = tierMap[form.tier] ?? 0;
   const total  = Math.min(Math.round(budget + team + client + exp + skill + loc), 100);
 
@@ -205,9 +270,9 @@ const css = `
   .as-progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #60A5FA, #2563EB, #1D4ED8); transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
 
   /* FORM CARD */
-  .as-card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; margin-bottom: 14px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+  .as-card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; margin-bottom: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
   .as-card-edge { height: 3px; background: linear-gradient(90deg, #93C5FD, #2563EB 45%, #1E3A8A 75%, transparent); }
-  .as-card-body { padding: 32px; }
+  .as-card-body { padding: 40px 48px; }
 
   .as-card-step-num {
     font-family: 'DM Mono'; font-size: 10px; color: #2563EB; letter-spacing: 0.12em; text-transform: uppercase;
@@ -230,11 +295,11 @@ const css = `
   }
 
   /* DOMAIN GRID */
-  .as-domain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .as-domain-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .as-domain-btn {
-    display: flex; align-items: center; gap: 14px; padding: 17px 18px;
-    background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px;
-    cursor: pointer; text-align: left; font-family: 'DM Sans'; transition: all 0.2s;
+    display: flex; align-items: center; gap: 14px; padding: 20px 22px;
+    background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px;
+    cursor: pointer; text-align: left; font-family: 'DM Sans'; transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
     position: relative; overflow: hidden;
   }
   .as-domain-btn::before {
@@ -265,25 +330,25 @@ const css = `
   .as-label { display: block; font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
   .as-hint  { font-size: 11px; color: #64748B; margin-top: 6px; line-height: 1.5; }
 
-  .as-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .as-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
   .as-field-row:last-child { margin-bottom: 0; }
 
   .as-input-wrap { position: relative; }
-  .as-input-prefix { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-family: 'DM Mono'; font-size: 14px; color: #64748B; pointer-events: none; }
+  .as-input-prefix { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-family: 'DM Mono'; font-size: 15px; color: #64748B; pointer-events: none; }
   .as-input {
-    width: 100%; padding: 14px 16px; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 8px;
-    color: #0F172A; font-size: 14px; font-family: 'DM Mono'; outline: none; transition: all 0.2s; font-weight: 500;
+    width: 100%; padding: 16px 20px; background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 10px;
+    color: #0F172A; font-size: 15px; font-family: 'DM Mono'; outline: none; transition: all 0.25s; font-weight: 500;
   }
-  .as-input.pfx { padding-left: 32px; }
+  .as-input.pfx { padding-left: 36px; }
   .as-input::placeholder { color: #94A3B8; font-weight: 400; }
   .as-input:focus { border-color: #2563EB; box-shadow: 0 0 0 3px #DBEAFE; }
   .as-input.err { border-color: #EF4444; }
 
   /* TEAM SIZE */
-  .as-size-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 28px; }
+  .as-size-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 36px; }
   .as-size-btn {
-    padding: 18px 10px; text-align: center; background: #F8FAFC; border: 1px solid #E2E8F0;
-    border-radius: 8px; cursor: pointer; font-family: 'DM Sans'; transition: all 0.2s; position: relative; overflow: hidden;
+    padding: 22px 10px; text-align: center; background: #F8FAFC; border: 1px solid #E2E8F0;
+    border-radius: 10px; cursor: pointer; font-family: 'DM Sans'; transition: all 0.25s; position: relative; overflow: hidden;
   }
   .as-size-btn::after {
     content: ''; position: absolute; bottom: 0; left: 8%; right: 8%; height: 3px;
@@ -299,12 +364,12 @@ const css = `
   .as-size-btn.sel .as-size-sub { color: #1E3A8A; }
 
   /* SKILLS */
-  .as-skills { display: flex; flex-wrap: wrap; gap: 10px; }
+  .as-skills { display: flex; flex-wrap: wrap; gap: 12px; }
   .as-skill {
-    display: flex; align-items: center; gap: 8px; padding: 10px 16px;
-    background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px;
-    font-size: 13px; font-weight: 500; color: #475569;
-    cursor: pointer; font-family: 'DM Sans'; transition: all 0.18s;
+    display: flex; align-items: center; gap: 10px; padding: 12px 20px;
+    background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px;
+    font-size: 14px; font-weight: 500; color: #475569;
+    cursor: pointer; font-family: 'DM Sans'; transition: all 0.2s;
   }
   .as-skill:hover { border-color: #93C5FD; color: #0F172A; background: #FFFFFF; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
   .as-skill.sel   { background: #EFF6FF; border-color: #2563EB; color: #1D4ED8; }
@@ -804,7 +869,7 @@ export default function Assessment() {
                     )}
                   </label>
                   <div className="as-skills">
-                    {SKILLS.map(s => (
+                    {(DOMAIN_SKILLS[form.domain] || DEFAULT_SKILLS).map(s => (
                       <button key={s.val} className={`as-skill${form.skills.includes(s.val) ? " sel" : ""}`} onClick={() => toggleSkill(s.val)}>
                         <span className="as-skill-emoji">{s.emoji}</span>{s.val}
                       </button>
@@ -818,9 +883,12 @@ export default function Assessment() {
                 <div className="as-tier-grid">
                   {TIERS.map(t => (
                     <button key={t.val} className={`as-tier-btn${form.tier === t.val ? " sel" : ""}`} onClick={() => update("tier", t.val)}>
-                      <div>
-                        <div className="as-tier-name">{t.label}</div>
-                        <div className="as-tier-sub">{t.sub}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                        <div style={{ fontSize: 24, filter: "drop-shadow(0 2px 2px rgba(0,0,0,0.05))" }}>{t.emoji}</div>
+                        <div>
+                          <div className="as-tier-name">{t.label}</div>
+                          <div className="as-tier-sub">{t.sub}</div>
+                        </div>
                       </div>
                       <div className="as-tier-pts">+{t.pts} pts</div>
                     </button>
