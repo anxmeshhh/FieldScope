@@ -338,11 +338,19 @@ def dashboard_data(request):
         user = cursor.fetchone()
 
         # FIX: added capability_score so roadmap score banner works
-        cursor.execute("""
-            SELECT domain, business_level, capability_score,
-                   team_size, capital, revenue, clients, tier, skills, confidence
-            FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
-        """, (user_id,))
+        hist_id = request.GET.get("id")
+        if hist_id:
+            cursor.execute("""
+                SELECT domain, business_level, capability_score,
+                       team_size, capital, revenue, clients, tier, skills, confidence
+                FROM assessments WHERE user_id = %s AND id = %s
+            """, (user_id, hist_id))
+        else:
+            cursor.execute("""
+                SELECT domain, business_level, capability_score,
+                       team_size, capital, revenue, clients, tier, skills, confidence
+                FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
+            """, (user_id,))
         assessment = cursor.fetchone()
 
         cursor.close(); conn.close()
@@ -357,6 +365,37 @@ def dashboard_data(request):
             "name":       user["name"] if user else "User",
             "assessment": assessment,
         })
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+
+
+@require_http_methods(["GET"])
+def assessment_history(request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return JsonResponse({"error": "Not logged in"}, status=401)
+
+    try:
+        conn   = get_db()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT id, domain, business_level, capability_score, confidence, created_at
+            FROM assessments 
+            WHERE user_id = %s 
+            ORDER BY created_at DESC
+        """, (user_id,))
+        history = cursor.fetchall()
+
+        cursor.close(); conn.close()
+
+        # Format dates as strings
+        for entry in history:
+            if entry.get("created_at"):
+                entry["created_at"] = entry["created_at"].isoformat()
+
+        return JsonResponse({"history": history})
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
@@ -395,11 +434,19 @@ def get_recommendations(request):
     try:
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("""
-            SELECT id, domain, business_level, capability_score, skills, tier,
-                   team_size, capital, revenue, clients, ai_recommendations
-            FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
-        """, (user_id,))
+        hist_id = request.GET.get("id")
+        if hist_id:
+            cursor.execute("""
+                SELECT id, domain, business_level, capability_score, skills, tier,
+                       team_size, capital, revenue, clients, ai_recommendations
+                FROM assessments WHERE user_id = %s AND id = %s
+            """, (user_id, hist_id))
+        else:
+            cursor.execute("""
+                SELECT id, domain, business_level, capability_score, skills, tier,
+                       team_size, capital, revenue, clients, ai_recommendations
+                FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
+            """, (user_id,))
         a = cursor.fetchone()
         cursor.close(); conn.close()
     except Exception as e:
@@ -490,11 +537,19 @@ def generate_roadmap(request):
     try:
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("""
-            SELECT id, domain, business_level, capability_score, skills, tier,
-                   team_size, ai_roadmap
-            FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
-        """, (user_id,))
+        hist_id = request.GET.get("id")
+        if hist_id:
+            cursor.execute("""
+                SELECT id, domain, business_level, capability_score, skills, tier,
+                       team_size, ai_roadmap
+                FROM assessments WHERE user_id = %s AND id = %s
+            """, (user_id, hist_id))
+        else:
+            cursor.execute("""
+                SELECT id, domain, business_level, capability_score, skills, tier,
+                       team_size, ai_roadmap
+                FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
+            """, (user_id,))
         a = cursor.fetchone()
         cursor.close(); conn.close()
     except Exception as e:
@@ -860,12 +915,21 @@ def get_personalized_industries(request):
         conn   = get_db()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("""
-            SELECT id, domain, business_level, capability_score,
-                   skills, tier, team_size, capital, revenue, clients
-            FROM assessments
-            WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
-        """, (user_id,))
+        hist_id = request.GET.get("id")
+        if hist_id:
+            cursor.execute("""
+                SELECT id, domain, business_level, capability_score,
+                       skills, tier, team_size, capital, revenue, clients
+                FROM assessments
+                WHERE user_id = %s AND id = %s
+            """, (user_id, hist_id))
+        else:
+            cursor.execute("""
+                SELECT id, domain, business_level, capability_score,
+                       skills, tier, team_size, capital, revenue, clients
+                FROM assessments
+                WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
+            """, (user_id,))
         assessment = cursor.fetchone()
 
         if not assessment:
@@ -918,10 +982,11 @@ def refresh_personalized_industries(request):
     try:
         conn   = get_db()
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("""
-            SELECT id FROM assessments
-            WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
-        """, (user_id,))
+        hist_id = request.GET.get("id")
+        if hist_id:
+            cursor.execute("SELECT id FROM assessments WHERE user_id = %s AND id = %s", (user_id, hist_id))
+        else:
+            cursor.execute("SELECT id FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1", (user_id,))
         row = cursor.fetchone()
         if row:
             cursor.execute("""
@@ -1124,13 +1189,21 @@ def get_industry_detail(request, slug):
                 "slug":     slug,
             })
 
-        # ── Need to generate — get user assessment ──
-        cursor.execute("""
-            SELECT domain, business_level, capability_score,
-                   skills, tier, capital, revenue
-            FROM assessments
-            WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
-        """, (user_id,))
+        hist_id = request.GET.get("id")
+        if hist_id:
+            cursor.execute("""
+                SELECT domain, business_level, capability_score,
+                       skills, tier, capital, revenue
+                FROM assessments
+                WHERE user_id = %s AND id = %s
+            """, (user_id, hist_id))
+        else:
+            cursor.execute("""
+                SELECT domain, business_level, capability_score,
+                       skills, tier, capital, revenue
+                FROM assessments
+                WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
+            """, (user_id,))
         assessment = cursor.fetchone()
         cursor.close(); conn.close()
 
@@ -1259,11 +1332,11 @@ def save_task_progress(request):
         conn   = get_db()
         cursor = conn.cursor(dictionary=True)
 
-        # get latest assessment id
-        cursor.execute("""
-            SELECT id FROM assessments
-            WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
-        """, (user_id,))
+        hist_id = request.GET.get("id")
+        if hist_id:
+            cursor.execute("SELECT id FROM assessments WHERE user_id = %s AND id = %s", (user_id, hist_id))
+        else:
+            cursor.execute("SELECT id FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1", (user_id,))
         row = cursor.fetchone()
         if not row:
             cursor.close(); conn.close()
@@ -1308,10 +1381,11 @@ def get_task_progress(request):
         conn   = get_db()
         cursor = conn.cursor(dictionary=True)
 
-        cursor.execute("""
-            SELECT id FROM assessments
-            WHERE user_id = %s ORDER BY created_at DESC LIMIT 1
-        """, (user_id,))
+        hist_id = request.GET.get("id")
+        if hist_id:
+            cursor.execute("SELECT id FROM assessments WHERE user_id = %s AND id = %s", (user_id, hist_id))
+        else:
+            cursor.execute("SELECT id FROM assessments WHERE user_id = %s ORDER BY created_at DESC LIMIT 1", (user_id,))
         row = cursor.fetchone()
         if not row:
             cursor.close(); conn.close()

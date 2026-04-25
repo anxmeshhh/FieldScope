@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Search, ChevronRight, RefreshCw, Sparkles, MapPin,
   TrendingUp, Target, ArrowUpRight, Filter, X,
@@ -601,6 +601,10 @@ function IndustryCard({
 // ── MAIN ──────────────────────────────────────────────────────────────────────
 export default function IndustryExplorer() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const histId = searchParams.get("history");
+  const q = histId ? `?id=${histId}` : "";
+  const nav = (p: string) => navigate(histId ? `${p}?history=${histId}` : p);
 
   const [industries,   setIndustries]   = useState<Industry[]>([]);
   const [snap,         setSnap]         = useState<AssessmentSnap | null>(null);
@@ -618,7 +622,7 @@ export default function IndustryExplorer() {
 
   // ── fetch assessment snapshot for profile strip
   useEffect(() => {
-    fetch(`${API}/dashboard/data/`, { credentials: "include" })
+    fetch(`${API}/dashboard/data/${q}`, { credentials: "include" })
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         if (d?.assessment) {
@@ -650,10 +654,10 @@ export default function IndustryExplorer() {
         setRefreshing(true);
         setIndustries([]);
         setGeneratedAt("");
-        await fetch(`${API}/industries/refresh/`, { credentials: "include" });
+        await fetch(`${API}/industries/refresh/${q}`, { credentials: "include" });
       }
 
-      const res  = await fetch(`${API}/industries/personalized/`, { credentials: "include" });
+      const res  = await fetch(`${API}/industries/personalized/${q}`, { credentials: "include" });
       const data = await res.json();
 
       if (!res.ok) { setError(data.error || "Failed to load."); return; }
@@ -919,7 +923,7 @@ export default function IndustryExplorer() {
               personalized={personalized}
               activeTag={activeTag}
               onTagClick={t => setActiveTag(activeTag === t ? "" : t)}
-              onNavigate={slug => navigate(`/explore/${slug}`)}
+              onNavigate={slug => nav(`/explore/${slug}`)}
             />
           ))}
 

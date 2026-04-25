@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   TrendingUp, Target, ArrowRight, Zap,
   CheckCircle, Map, Layers, ChevronRight,
@@ -25,6 +25,15 @@ interface Assessment {
 interface DashboardData {
   name: string;
   assessment: Assessment | null;
+}
+
+interface HistoryEntry {
+  id: number;
+  domain: string;
+  business_level: string;
+  capability_score: number;
+  confidence: number;
+  created_at: string;
 }
 
 interface Rec {
@@ -799,6 +808,23 @@ const css = `
     .db-greeting { font-size: 28px; }
     .db-head { flex-direction: column; align-items: flex-start; gap: 14px; }
   }
+
+  /* ─── HISTORY TABLE ─── */
+  .db-history-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  .db-history-table th {
+    text-align: left; padding: 12px 16px;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted3);
+    border-bottom: 1px solid var(--divider);
+  }
+  .db-history-table td {
+    padding: 16px; border-bottom: 1px solid var(--divider);
+    font-size: 13px; font-weight: 600; color: var(--text);
+  }
+  .db-history-table tr:last-child td { border-bottom: none; }
+  .db-history-table tr:hover td { background: rgba(18,86,243,0.02); }
+  .db-history-date { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted2); }
+  .db-history-score { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; color: var(--blue); }
 `;
 
 // ─── HELPERS ───
@@ -857,11 +883,16 @@ function ScoreArc({ score }: { score: number }) {
 // ─── MAIN ───
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const histId = searchParams.get("history");
+  const q = histId ? `?id=${histId}` : "";
+  const nav = (p: string) => navigate(histId ? `${p}?history=${histId}` : p);
 
   const [data,          setData]          = useState<DashboardData | null>(null);
   const [recs,          setRecs]          = useState<Rec[] | null>(null);
   const [roadmap,       setRoadmap]       = useState<RoadmapWeek[] | null>(null);
   const [industries,    setIndustries]    = useState<Industry[] | null>(null);
+  const [history,       setHistory]       = useState<HistoryEntry[]>([]);
   const [recsStatus,    setRecsStatus]    = useState<"loading"|"cached"|"fresh"|"none">("loading");
   const [roadmapStatus, setRoadmapStatus] = useState<"loading"|"cached"|"fresh"|"none">("loading");
   const [indStatus,     setIndStatus]     = useState<"loading"|"cached"|"fresh"|"generating"|"none">("loading");
@@ -870,33 +901,38 @@ export default function Dashboard() {
   const scoreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch(`${API}/dashboard/data/`, { credentials: "include" })
+    fetch(`${API}/dashboard/data/${q}`, { credentials: "include" })
       .then(r => { if (r.status === 401) { navigate("/login"); return null; } return r.json(); })
       .then(d => { if (d) setData(d); })
       .finally(() => setLoading(false));
 
-    fetch(`${API}/recommendations/`, { credentials: "include" })
+    fetch(`${API}/assessments/history/`, { credentials: "include" })
+      .then(r => r.json())
+      .then(h => { if (h.history) setHistory(h.history); })
+      .catch(() => {});
+
+    fetch(`${API}/recommendations/${q}`, { credentials: "include" })
       .then(r => r.json())
       .then(d => {
         if (d.recommendations) { setRecs(d.recommendations.slice(0, 3)); setRecsStatus(d.cached ? "cached" : "fresh"); }
         else setRecsStatus("none");
       }).catch(() => setRecsStatus("none"));
 
-    fetch(`${API}/roadmap/generate/`, { credentials: "include" })
+    fetch(`${API}/roadmap/generate/${q}`, { credentials: "include" })
       .then(r => r.json())
       .then(d => {
         if (d.roadmap) { setRoadmap(d.roadmap); setRoadmapStatus(d.cached ? "cached" : "fresh"); }
         else setRoadmapStatus("none");
       }).catch(() => setRoadmapStatus("none"));
 
-    fetch(`${API}/industries/personalized/`, { credentials: "include" })
+    fetch(`${API}/industries/personalized/${q}`, { credentials: "include" })
       .then(r => r.json())
       .then(d => {
         if (d.generating) { setIndStatus("generating"); return; }
         if (d.industries?.length) { setIndustries(d.industries.slice(0, 4)); setIndStatus(d.cached ? "cached" : "fresh"); }
         else setIndStatus("none");
       }).catch(() => setIndStatus("none"));
-  }, []);
+  }, [q]);
 
   useEffect(() => {
     if (!scoreRef.current) return;
@@ -1011,7 +1047,7 @@ export default function Dashboard() {
               <div
                 key={step.num}
                 className={`db-journey-step step-${step.status}`}
-                onClick={() => step.path && step.status !== "pending" && navigate(step.path)}
+                onClick={() => step.path && step.status !== "pending" && nav(step.path)}
               >
                 <div className="db-step-num">{step.num}</div>
                 <div className="db-step-title">{step.title}</div>
@@ -1114,7 +1150,7 @@ export default function Dashboard() {
                   <div
                     key={week.week}
                     className={`db-rm-week${i===0 ? " rm-active" : ""}`}
-                    onClick={() => navigate("/roadmap")}
+                    onClick={() => nav("/roadmap")}
                   >
                     <div
                       className="db-rm-num"
@@ -1134,7 +1170,7 @@ export default function Dashboard() {
                     <ChevronRight size={13} color="#B4C2F2" style={{ flexShrink:0, marginTop:6 }} />
                   </div>
                 ))}
-                <button className="db-rm-view-btn" onClick={() => navigate("/roadmap")}>
+                <button className="db-rm-view-btn" onClick={() => nav("/roadmap")}>
                   <Map size={13} /> Open Full Roadmap
                 </button>
               </>
@@ -1158,7 +1194,7 @@ export default function Dashboard() {
                 <div
                   key={m.name}
                   className={`db-ai-module${m.status==="cached"||m.status==="fresh" ? " ai-ready" : ""}`}
-                  onClick={() => (m.status==="cached"||m.status==="fresh") && navigate(m.path)}
+                  onClick={() => (m.status==="cached"||m.status==="fresh") && nav(m.path)}
                 >
                   <div className={`db-ai-dot ${dotClass(m.status)}`} />
                   <div className="db-ai-name">{m.name}</div>
@@ -1189,14 +1225,14 @@ export default function Dashboard() {
                 { icon:Map,        label:"Roadmap",     sub: roadmap ? `${roadmap.length}wk plan` : "Pending",       path:"/roadmap" },
                 { icon:Layers,     label:"Industries",  sub: industries ? `${industries.length} matched` : "Pending", path:"/explore" },
                 { icon:TrendingUp, label:"Recs",        sub: recs ? `${recs.length} actions` : "Pending",            path:"/recommendations" },
-              ].map(nav => (
-                <div key={nav.label} className="db-qnav" onClick={() => navigate(nav.path)}>
+              ].map(navItem => (
+                <div key={navItem.label} className="db-qnav" onClick={() => nav(navItem.path)}>
                   <div className="db-qnav-icon">
-                    <nav.icon size={13} color="#1256F3" />
+                    <navItem.icon size={13} color="#1256F3" />
                   </div>
                   <div style={{ flex:1 }}>
-                    <div className="db-qnav-label">{nav.label}</div>
-                    <div className="db-qnav-sub">{nav.sub}</div>
+                    <div className="db-qnav-label">{navItem.label}</div>
+                    <div className="db-qnav-sub">{navItem.sub}</div>
                   </div>
                   <ArrowRight size={12} color="#B4C2F2" />
                 </div>
@@ -1269,7 +1305,7 @@ export default function Dashboard() {
               </div>
               {recs && (
                 <button
-                  onClick={() => navigate("/recommendations")}
+                  onClick={() => nav("/recommendations")}
                   style={{ background:"transparent", border:"none", color:"#1256F3", cursor:"pointer", fontSize:12, fontWeight:700, display:"flex", alignItems:"center", gap:4, fontFamily:"Manrope, sans-serif" }}
                 >
                   All <ChevronRight size={12} />
@@ -1320,7 +1356,7 @@ export default function Dashboard() {
               </div>
               {industries && (
                 <button
-                  onClick={() => navigate("/explore")}
+                  onClick={() => nav("/explore")}
                   style={{ background:"transparent", border:"none", color:"#1256F3", cursor:"pointer", fontSize:12, fontWeight:700, display:"flex", alignItems:"center", gap:4, fontFamily:"Manrope, sans-serif" }}
                 >
                   All <ChevronRight size={12} />
@@ -1344,7 +1380,7 @@ export default function Dashboard() {
             )}
 
             {industries && industries.map(ind => (
-              <div key={ind.slug} className="db-ind" onClick={() => navigate(`/explore/${ind.slug}`)}>
+              <div key={ind.slug} className="db-ind" onClick={() => nav(`/explore/${ind.slug}`)}>
                 <div className="db-ind-emoji">{ind.emoji}</div>
                 <div style={{ flex:1, minWidth:0 }}>
                   <div className="db-ind-name">{ind.name}</div>
@@ -1358,7 +1394,7 @@ export default function Dashboard() {
             ))}
 
             {industries && (
-              <div className="db-explore-more" onClick={() => navigate("/explore")}>
+              <div className="db-explore-more" onClick={() => nav("/explore")}>
                 <span>Explore all industries</span>
                 <Building2 size={13} color="#1256F3" />
               </div>
@@ -1366,6 +1402,51 @@ export default function Dashboard() {
           </div>
 
         </div>
+
+        {/* HISTORY PANEL */}
+        {history.length > 0 && (
+          <div className="db-card" style={{ marginTop: 16 }}>
+            <div className="db-card-strip" />
+            <div className="db-card-head">
+              <div>
+                <div className="db-card-title">Assessment History</div>
+                <div className="db-card-sub">Progression timeline of your diagnostics</div>
+              </div>
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table className="db-history-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Domain</th>
+                    <th>Level</th>
+                    <th>Score</th>
+                    <th>Confidence</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map(h => (
+                    <tr key={h.id} onClick={() => navigate(`?history=${h.id}`)} style={{ cursor: "pointer" }}>
+                      <td className="db-history-date">
+                        {h.id.toString() === histId && <span style={{color:"#1256F3", marginRight:6}}>▶</span>}
+                        {new Date(h.created_at).toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </td>
+                      <td>{h.domain}</td>
+                      <td>
+                        <span className={`db-pill ${h.business_level === "Enterprise" ? "green" : h.business_level === "Intermediate" ? "amber" : ""}`} style={{ fontSize: 10, padding: "3px 8px" }}>
+                          {h.business_level}
+                        </span>
+                      </td>
+                      <td className="db-history-score">{h.capability_score}<span style={{ color:"var(--muted3)", fontSize: 10 }}>/100</span></td>
+                      <td className="db-history-date">{h.confidence}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
       </div>
     </>
   );

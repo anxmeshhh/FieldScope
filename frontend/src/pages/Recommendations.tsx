@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   CheckCircle, XCircle, AlertTriangle, ArrowRight,
   Loader2, Zap, TrendingUp, Target, Map,
@@ -403,12 +403,16 @@ const FALLBACK_AVOID = [
 
 export default function Recommendations() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const histId = searchParams.get("history");
+  const q = histId ? `?id=${histId}` : "";
+  const nav = (p: string) => navigate(histId ? `${p}?history=${histId}` : p);
   const [loading, setLoading] = useState(true);
   const [data, setData]       = useState<any>(null);
   const [error, setError]     = useState("");
 
   useEffect(() => {
-    fetch(`${API}/recommendations/`, { credentials: "include" })
+    fetch(`${API}/recommendations/${q}`, { credentials: "include" })
       .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then(d => { setData(d); setLoading(false); })
       .catch(e => { setError(e.message); setLoading(false); });
@@ -500,12 +504,12 @@ export default function Recommendations() {
                 { icon: TrendingUp, label: "Dashboard",  sub: "Live overview",   path: "/dashboard"       },
                 { icon: Map,        label: "Roadmap",    sub: "4-week plan",     path: "/roadmap"          },
                 { icon: Target,     label: "Industries", sub: "Matched for you", path: "/explore"          },
-              ].map(q => (
-                <div key={q.label} className="rec-quick-item" onClick={() => navigate(q.path)}>
-                  <div className="rec-quick-icon"><q.icon size={14} color="#E85D04" /></div>
+              ].map(qItem => (
+                <div key={qItem.label} className="rec-quick-item" onClick={() => nav(qItem.path)}>
+                  <div className="rec-quick-icon"><qItem.icon size={14} color="#E85D04" /></div>
                   <div>
-                    <div className="rec-quick-label">{q.label}</div>
-                    <div className="rec-quick-sub">{q.sub}</div>
+                    <div className="rec-quick-label">{qItem.label}</div>
+                    <div className="rec-quick-sub">{qItem.sub}</div>
                   </div>
                 </div>
               ))}
@@ -597,7 +601,7 @@ export default function Recommendations() {
 
             {/* CTA */}
             <div className="rec-cta">
-              <button className="rec-cta-primary" onClick={() => navigate("/roadmap")}>
+              <button className="rec-cta-primary" onClick={() => nav("/roadmap")}>
                 <Map size={14} /> Generate My Growth Roadmap <ArrowRight size={14} />
               </button>
               <button className="rec-cta-secondary" onClick={() => navigate("/dashboard")}>

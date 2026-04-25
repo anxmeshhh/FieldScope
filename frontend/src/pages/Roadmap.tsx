@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   CheckCircle, Circle, Loader2, Zap, Flag,
   ChevronRight, Trophy, Flame, TrendingUp,
@@ -204,6 +204,10 @@ function scoreColor(s: number) {
 
 export default function Roadmap() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const histId = searchParams.get("history");
+  const q = histId ? `?id=${histId}` : "";
+  const nav = (p: string) => navigate(histId ? `${p}?history=${histId}` : p);
   const [loading,    setLoading]    = useState(true);
   const [saving,     setSaving]     = useState<string | null>(null);
   const [saveFlash,  setSaveFlash]  = useState<"saving" | "saved" | null>(null);
@@ -215,9 +219,9 @@ export default function Roadmap() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API}/roadmap/generate/`, { credentials: "include" }).then(r => r.json()),
-      fetch(`${API}/roadmap/tasks/`,    { credentials: "include" }).then(r => r.json()),
-      fetch(`${API}/dashboard/data/`,   { credentials: "include" }).then(r => r.json()),
+      fetch(`${API}/roadmap/generate/${q}`, { credentials: "include" }).then(r => r.json()),
+      fetch(`${API}/roadmap/tasks/${q}`,    { credentials: "include" }).then(r => r.json()),
+      fetch(`${API}/dashboard/data/${q}`,   { credentials: "include" }).then(r => r.json()),
     ])
       .then(([rm, prog, dash]) => {
         // ── Roadmap data ──
@@ -271,7 +275,7 @@ export default function Roadmap() {
     setSaveFlash("saving");
 
     try {
-      await fetch(`${API}/roadmap/tasks/save/`, {
+      await fetch(`${API}/roadmap/tasks/save/${q}`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -392,16 +396,16 @@ export default function Roadmap() {
           { icon: Map,        label: "Roadmap",          sub: "You are here",    path: "/roadmap",         active: true  },
           { icon: Lightbulb,  label: "Recommendations",  sub: "AI growth tips",  path: "/recommendations", active: false },
           { icon: Building2,  label: "Industries",       sub: "Matched for you", path: "/explore",         active: false },
-        ].map(q => (
+        ].map(qItem => (
           <div
-            key={q.label}
-            className={`rm-quick-item${q.active ? " active" : ""}`}
-            onClick={() => !q.active && navigate(q.path)}
+            key={qItem.label}
+            className={`rm-quick-item${qItem.active ? " active" : ""}`}
+            onClick={() => !qItem.active && nav(qItem.path)}
           >
-            <div className="rm-quick-icon"><q.icon size={14} color="#E85D04" /></div>
+            <div className="rm-quick-icon"><qItem.icon size={14} color="#E85D04" /></div>
             <div>
-              <div className="rm-quick-label">{q.label}</div>
-              <div className="rm-quick-sub">{q.sub}</div>
+              <div className="rm-quick-label">{qItem.label}</div>
+              <div className="rm-quick-sub">{qItem.sub}</div>
             </div>
           </div>
         ))}
@@ -551,13 +555,13 @@ export default function Roadmap() {
                   All {totalTasks} tasks cleared across {weeks.length} weeks. Your next growth phase is ready.
                 </div>
                 <div className="rm-ad-ctas">
-                  <button className="rm-ad-primary" onClick={() => navigate("/recommendations")}>
+                  <button className="rm-ad-primary" onClick={() => nav("/recommendations")}>
                     <Lightbulb size={14} /> See Recommendations <ChevronRight size={14} />
                   </button>
-                  <button className="rm-ad-secondary" onClick={() => navigate("/explore")}>
+                  <button className="rm-ad-secondary" onClick={() => nav("/explore")}>
                     <Building2 size={14} /> Industries
                   </button>
-                  <button className="rm-ad-secondary" onClick={() => navigate("/dashboard")}>
+                  <button className="rm-ad-secondary" onClick={() => nav("/dashboard")}>
                     <TrendingUp size={14} /> Dashboard
                   </button>
                 </div>

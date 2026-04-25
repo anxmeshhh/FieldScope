@@ -48,10 +48,16 @@ The schema employs a hybrid relational-document design. While core relationships
 | `ai_roadmap` | JSON | | **Cached Output:** Structured 4-week execution plan. |
 | `created_at` | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Preserves the temporal history of the user's assessments. |
 
-### 3.2 Append-Only Historical Ledger
+### 3.2 Append-Only Historical Ledger & Context Propagation
 A critical feature of the FieldScope database architecture is its **append-only assessment logging**. When a user takes a new test, the system does *not* overwrite their previous data (no `UPDATE` statements are used for submission). Instead, a new row is appended with a `created_at` timestamp. 
 
-Currently, the telemetry dashboard and AI modules fetch the user's active state by running: `ORDER BY created_at DESC LIMIT 1`. However, this append-only design inherently preserves the entire historical dataset. **This will be used later** to build progression tracking charts (e.g., showing a user how their `capability_score` has increased over 6 months) and comparative timeline analyses.
+This append-only design inherently preserves the entire historical dataset. **This is fully integrated into the UI architecture**: users can click any past assessment from the Dashboard's History Panel. When clicked, the frontend leverages React Router's `useSearchParams` to inject a `?history=<id>` query parameter into the URL.
+
+**State Re-hydration Engine**:
+The `history` parameter triggers a contextual cascade across the entire platform:
+1. **Frontend**: The `?history=<id>` parameter is seamlessly propagated to all sub-pages (Roadmap, Recommendations, Industry Explorer) via a customized `nav()` router helper.
+2. **Backend**: Django API endpoints intercept the optional `?id=<id>` query string. If present, the SQL queries execute `WHERE user_id = %s AND id = %s` rather than defaulting to `ORDER BY created_at DESC LIMIT 1`.
+3. **LLM Caching**: Because `ai_recommendations` and `ai_roadmap` are cached per assessment row in the database, requesting a historical ID instantly serves the cached LLM output from that specific point in time, requiring zero new AI tokens while perfectly recreating the user's past strategy view.
 
 ### 3.3 AI Response Caching (The LLM Buffer)
 **The Problem**: LLM API calls are latency-heavy (1000ms - 4000ms) and subject to rate limits.
@@ -103,8 +109,9 @@ FieldScope enforces a strict **"White and Blue" Premium Aesthetic** (`#F8FAFC` b
 
 1. **Capability Assessment (`Assessment.tsx`)**: A multi-stage heuristic engine featuring **Dynamic Industry Mapping**. When a user selects their sector (e.g., HealthTech vs. E-Commerce), the subsequent "Skills" step instantly morphs to display field-specific capabilities. The backend (`views.py`) captures this dynamic payload and algorithmically calculates a normalized `capability_score` based on their selected skill densities and financial metrics before committing the snapshot to MySQL.
 2. **Main Dashboard (`Dashboard.tsx`)**: The centralized telemetry hub. Renders data visualizations (SVG progress bars, confidence metrics) by pulling the latest database row.
-3. **Industry Explorer (`IndustryExplorer.tsx`)**: Passes the user's skills through the Groq LLM to calculate pivot viability and generate cross-industry transition opportunities.
-4. **AI Recommendations (`Recommendations.tsx`)**: The strategic heart. Decodes LLaMA's output into a prioritized grid (High/Medium/Low priority styling) and a "Risk Avoidance" list to prevent common SME pitfalls.
+3. **Assessment History Panel (`Dashboard.tsx`)**: A dynamic data-grid integrated into the dashboard that fetches the temporal sequence of the user's assessments (via the append-only ledger), enabling long-term capability progression tracking.
+4. **Industry Explorer (`IndustryExplorer.tsx`)**: Passes the user's skills through the Groq LLM to calculate pivot viability and generate cross-industry transition opportunities.
+5. **AI Recommendations (`Recommendations.tsx`)**: The strategic heart. Decodes LLaMA's output into a prioritized grid (High/Medium/Low priority styling) and a "Risk Avoidance" list to prevent common SME pitfalls.
 
 ---
 

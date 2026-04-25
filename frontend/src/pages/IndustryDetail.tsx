@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, RefreshCw, Sparkles, TrendingUp, Building2, DollarSign } from "lucide-react";
 
 const API = "http://localhost:8000";
@@ -339,6 +339,9 @@ const css = `
 export default function IndustryDetail() {
   const { slug }    = useParams<{ slug: string }>();
   const navigate    = useNavigate();
+  const [searchParams] = useSearchParams();
+  const histId = searchParams.get("history");
+  const q = histId ? `?id=${histId}` : "";
   const [detail, setDetail]           = useState<IndustryDetail | null>(null);
   const [loading, setLoading]         = useState(true);
   const [refreshing, setRefreshing]   = useState(false);
@@ -349,9 +352,9 @@ export default function IndustryDetail() {
     try {
       if (forceRefresh) {
         setRefreshing(true);
-        await fetch(`${API}/industries/${slug}/refresh/`, { credentials: "include" });
+        await fetch(`${API}/industries/${slug}/refresh/${q}`, { credentials: "include" });
       }
-      const res  = await fetch(`${API}/industries/${slug}/`, { credentials: "include" });
+      const res  = await fetch(`${API}/industries/${slug}/${q}`, { credentials: "include" });
       const data = await res.json();
       if (res.ok) { setDetail(data.detail); setActiveLevel(0); }
       else setError(data.error || "Failed to load industry.");
